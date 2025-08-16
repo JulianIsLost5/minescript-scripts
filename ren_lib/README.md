@@ -1,6 +1,6 @@
 # Pyjinn Ren_Lib
 
-**Version**: 1.0.0-alpha\
+**Version**: 0.2.0-alpha\
 **Author**: JulianIsLost\
 **Date**: 15.08.2025
 
@@ -39,17 +39,22 @@ Before you start, make sure you have:
 
 Classes for rendering in the world
 
-- **Block()**\
-  Renders a vanilla block into the world\
+- **block(context, target_pos: Vec3, block: str)**
   
-- **Wireframe()**\
-  Renders a wireframe of custom size into the world\
-  
-- **WorldLine()**\
-  Renders a line into the world\
+  Renders a vanilla block into the world
 
-- **WorldText()**\
-  Renders a text into the world\
+  - **context**: `GuiGraphics` — The context passed by the RenderCallback.
+  - **target_pos**: `Vec3` - The position of the rendered block.
+  - **block:**: `str` - Search the block in [this classes’](https://mappings.dev/1.21.8/net/minecraft/world/level/block/Blocks.html) fields.
+  
+- **Wireframe()**
+  Renders a wireframe of custom size into the world
+  
+- **WorldLine()**
+  Renders a line into the world
+
+- **WorldText()**
+  Renders a text into the world
 
 ### HudRendering
 
@@ -60,7 +65,7 @@ The `HudRendering` class provides methods for drawing shapes, text, and interact
 
    Draws a rectangle on the Hud.
 
-   - **context**: `GuiGraphics` — The context passed by RenderCallback.
+   - **context**: `GuiGraphics` — The context passed by the RenderCallback.
    - **position**: `(x, y)` — The center coordinates of the rectangle.
    - **width**: `int` — Width in pixels.
    - **height**: `int` — Height in pixels.
@@ -72,12 +77,12 @@ The `HudRendering` class provides methods for drawing shapes, text, and interact
    HudRendering.rectangle(context, (50, 20), 80, 10, (255, 255, 0, 0), True)
    ```
    
-- **text(context, text: string, position: Tuple[int, int], text_color: Tuple[int, int, int, int])**
+- **text(context, text: str, position: Tuple[int, int], text_color: Tuple[int, int, int, int])**
   
    Draws a text on the Hud.
   
-   - **context**: `GuiGraphics` — The context passed by RenderCallback.
-   - **text**: `string` - The text to be drawn.
+   - **context**: `GuiGraphics` — The context passed by the RenderCallback.
+   - **text**: `str` - The text to be drawn.
    - **position**: `(x, y)` — The center coordinates of the rectangle.
    - **text_color**: `(alpha, red, green, blue)` — ARGB color values (0–255).
 
@@ -86,11 +91,11 @@ The `HudRendering` class provides methods for drawing shapes, text, and interact
    HudRendering.text(context, "Example Text", (50, 20), (255, 255, 0, 0))
    ```
   
-- **item(context, block_id: string, width: int, height: int)**
+- **item(context, block_id: str, width: int, height: int)**
 
   Renders an item on the Hud
 
-  - **context:** `GuiGraphics` — The context passed by RenderCallback.
+  - **context:** `GuiGraphics` — The context passed by the RenderCallback.
   - **block_id:** `minecraft:block` - The internal block id.
   - **width, height:** Icon size.
 
@@ -102,7 +107,7 @@ The `HudRendering` class provides methods for drawing shapes, text, and interact
   Note:
    This method was taken in its entirety from [RazrCraft](https://github.com/R4z0rX)
 
-- **button(position: Tuple[int, int], width: int, height: int, text: string, text_color: Tuple[int, int, int, int], button_color: Tuple[int, int, int, int], click_callback: Callable)**
+- **button(position: Tuple[int, int], width: int, height: int, text: str, text_color: Tuple[int, int, int, int], button_color: Tuple[int, int, int, int], click_callback: Callable)**
 
   Unlike the other Hud methods, `button` is a **subclass** and needs to be instantiated using the constructor. Then its `render()` method needs to be called in the render loop. (Use example below as reference)
    - **position:** `(x, y)` - The center coordinates of the button.
