@@ -1,8 +1,8 @@
 # Pyjinn Ren_Lib
 
-**Version**: 0.2.0-alpha\
-**Author**: JulianIsLost\
-**Date**: 15.08.2025
+**Version:** 0.2.0-alpha\
+**Author:** JulianIsLost\
+**Date:** 15.08.2025
 
 User-friendly API for performing rendering operations in Minecraft using [Minescripts Pyjinn](https://minescript.net/pyjinn/).  
 This module should be imported by other scripts and not run directly.
@@ -43,9 +43,9 @@ Classes for rendering in the world
   
   Renders a vanilla block into the world
 
-  - **context**: `GuiGraphics` — The context passed by the RenderCallback.
-  - **target_pos**: `Vec3` - The position of the rendered block.
-  - **block:**: `str` - Search the block in [this classes’](https://mappings.dev/1.21.8/net/minecraft/world/level/block/Blocks.html) fields.
+  - **context:** `GuiGraphics` — The context passed by the RenderCallback.
+  - **target_pos:** `Vec3` - The position of the rendered block.
+  - **block:** `str` - Search the block in [this classes’](https://mappings.dev/1.21.8/net/minecraft/world/level/block/Blocks.html) fields.
   
 - **Wireframe()**
   Renders a wireframe of custom size into the world
@@ -65,12 +65,12 @@ The `HudRendering` class provides methods for drawing shapes, text, and interact
 
    Draws a rectangle on the Hud.
 
-   - **context**: `GuiGraphics` — The context passed by the RenderCallback.
-   - **position**: `(x, y)` — The center coordinates of the rectangle.
-   - **width**: `int` — Width in pixels.
-   - **height**: `int` — Height in pixels.
-   - **color**: `(alpha, red, green, blue)` — ARGB color values (0–255).
-   - **solid**: `bool` — Whether the rectangle is filled (`True`) or outlined (`False`).
+   - **context:** `GuiGraphics` — The context passed by the RenderCallback.
+   - **position:** `(x, y)` — The center coordinates of the rectangle.
+   - **width:** `int` — Width in pixels.
+   - **height:** `int` — Height in pixels.
+   - **color:** `(alpha, red, green, blue)` — ARGB color values (0–255).
+   - **solid:** `bool` — Whether the rectangle is filled (`True`) or outlined (`False`).
 
    Example:
    ```python
@@ -81,10 +81,10 @@ The `HudRendering` class provides methods for drawing shapes, text, and interact
   
    Draws a text on the Hud.
   
-   - **context**: `GuiGraphics` — The context passed by the RenderCallback.
-   - **text**: `str` - The text to be drawn.
-   - **position**: `(x, y)` — The center coordinates of the rectangle.
-   - **text_color**: `(alpha, red, green, blue)` — ARGB color values (0–255).
+   - **context:** `GuiGraphics` — The context passed by the RenderCallback.
+   - **text:** `str` - The text to be drawn.
+   - **position:** `(x, y)` — The center coordinates of the rectangle.
+   - **text_color:** `(alpha, red, green, blue)` — ARGB color values (0–255).
 
    Example:
    ```python
