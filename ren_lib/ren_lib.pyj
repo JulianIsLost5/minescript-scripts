@@ -6,6 +6,9 @@ ARGB = JavaClass("net.minecraft.util.ARGB") # type: ignore
 BuiltInRegistries = JavaClass("net.minecraft.core.registries.BuiltInRegistries")
 ResourceLocation = JavaClass("net.minecraft.resources.ResourceLocation")
 Items = JavaClass("net.minecraft.world.item.Items")
+RenderType = JavaClass("net.minecraft.client.renderer.RenderType") # type: ignore
+Blocks = JavaClass("net.minecraft.world.level.block.Blocks") # type: ignore
+OverlayTexture = JavaClass("net.minecraft.client.renderer.texture.OverlayTexture")
  
 mc = Minecraft.getInstance()
 
@@ -15,10 +18,28 @@ def get_item_from_blockid(block_id: str):
 
 # World Rendering Classes
 class WorldRendering():
-    class Block():
-        def __init__(self):
-        pass
-
+    def block(context, target_pos, block):
+        poseStack = context.matrixStack()
+        bufferSource = mc.renderBuffers().bufferSource()
+        
+        dispatcher = mc.getBlockRenderer()
+        
+        blocks_fields = Blocks.getDeclaredFields()
+        for blocks_field in blocks_fields:
+            if blocks_field.getName() == block:
+                state = blocks_field.defaultBlockState()
+        
+        camera = context.camera()
+        camera_pos = camera.getPosition()
+        
+        poseStack.pushPose()
+        poseStack.translate(target_pos.x - camera_pos.x, target_pos.y - camera_pos.y, target_pos.z - camera_pos.z)
+        
+        dispatcher.renderSingleBlock(state, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY)
+        poseStack.popPose()
+        
+        bufferSource.endBatch(RenderType.solid())
+        
     class Wireframe():
         def __init__(self):
             pass
