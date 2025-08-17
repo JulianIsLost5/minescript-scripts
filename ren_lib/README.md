@@ -1,6 +1,6 @@
 # Pyjinn Ren_Lib
 
-**Version:** 0.2.0-alpha\
+**Version:** 0.2.1-alpha\
 **Author:** JulianIsLost\
 **Date:** 15.08.2025
 
