@@ -83,27 +83,54 @@ class HudRendering:
         context.renderItem(item, width, height)
 
     class button():
-        def __init__(self, position, width, height, text, text_color, button_color, click_callback): 
-            self.left_x_position = position[0]-width*0.5
-            self.top_y_position = position[1]-height*0.5
-            self.right_x_position = position[0]+width*0.5
-            self.bottom_y_position = position[1]+height*0.5
-            self.width = width
-            self.height = height
-            self.text = text
+        def __init__(self, position, width, height, text, click_callback): 
+             self.left_x_position = position[0]-width*0.5
+             self.top_y_position = position[1]-height*0.5
+             self.right_x_position = position[0]+width*0.5
+             self.bottom_y_position = position[1]+height*0.5
+             self.width = width
+             self.height = height
+             self.font = mc.font
+             self.text_width = font.width(text)
+             self.text_height = font.lineHeight
+             self.click_callback = click_callback
+             m.add_event_listener("mouse", self.check_for_click)
+             self.text_color = ARGB.color(255, 0, 0, 0) 
+             self.text_shadow = False
+             self.text_component = Component.literal(text)
+             self.button_color = ARGB.color(125, 0, 0, 0) 
+             self.factor = 0.7
+        
+        def set_text_color(self, text_color):
             self.text_color = ARGB.color(*text_color)
+        
+        def set_text_shadow(self):
+            self.text_shadow = True
+        
+        def text_italic(self):
+            self.text_component = self.text_component.withStyle(ChatFormatting.ITALIC)
+        
+        def text_bold(self):
+            self.text_component = self.text_component.withStyle(ChatFormatting.BOLD)
+        
+        def text_underline(self):
+            self.text_component = self.text_component.withStyle(ChatFormatting.UNDERLINE)
+        
+        def text_strikethrough(self):
+            self.text_component = self.text_component.withStyle(ChatFormatting.STRIKETHROUGH)
+    
+        def set_button_color(self, button_color):
             self.button_color = ARGB.color(*button_color)
-            self.text_width = mc.font.width(text)
-            self.text_height = mc.font.lineHeight
-            self.click_callback = click_callback
-            m.add_event_listener("mouse", self.check_for_click)
+        
+        def set_onclick_factor(self, factor):
+            self.factor = factor
 
         def render(self, context):
             context.fill(self.left_x_position, self.top_y_position, self.right_x_position, self.bottom_y_position, self.button_color)
-            context.drawString(mc.font, self.text, int(self.position[0] - self.text_width*0.5), int(self.position[1] + self.text_height*0.5), self.text_color, False)
+            context.drawString(font, self.text_component, int(self.position[0] - self.text_width*0.5), int(self.position[1] + self.text_height*0.5), self.text_color, False)
     
         def lighten_color(self):
-            factor = 1/0.7
+            factor = 1/self.factor
         
             a = ARGB.alpha(self.button_color)
             r = ARGB.red(self.button_color)
@@ -113,14 +140,12 @@ class HudRendering:
             self.button_color = ARGB.color(a, int(r*factor), int(g*factor), int(b*factor))
         
         def darken_color(self):
-            factor = 0.7
-        
             a = ARGB.alpha(self.button_color)
             r = ARGB.red(self.button_color)
             g = ARGB.green(self.button_color)
             b = ARGB.blue(self.button_color)
         
-            self.button_color = ARGB.color(a, int(r*factor), int(g*factor), int(b*factor))
+            self.button_color = ARGB.color(a, int(r*self.factor), int(g*self.factor), int(b*self.factor))
     
         def button_clicked(self):
             self.darken_color()
