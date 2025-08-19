@@ -1,4 +1,4 @@
-# Pyjinn Lib_Rem
+# Pyjinn Lib_Ren
 
 **Version:** 0.2.3-alpha\
 **Author:** JulianIsLost\
