@@ -64,16 +64,16 @@ class HudRendering:
         color = ARGB.color(*color)
         
         if solid is True:
-            context.fill(self.left_x_position, self.top_y_position, self.right_x_position, self.bottom_y_position, self.color)
+            context.fill(left_x_position, top_y_position, right_x_position, bottom_y_position, color)
         elif solid is False:
-            context.renderOutline(self.left_x_position, self.top_y_position, self.width, self.height, self.color)
+            context.renderOutline(left_x_position, top_y_position, width, height, color)
 
     @staticmethod
     def text(context, text, position, text_color):
         left_x_position = position[0] - mc.font.width(text)*0.5
         text_color = ARGB.color(*text_color)
     
-        context.drawString(mc.font, self.text, left_x_position, position[1], self.text_color, False)
+        context.drawString(mc.font, text, left_x_position, position[1], text_color, False)
 
     # Taken from razrcraft
     @staticmethod
