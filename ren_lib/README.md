@@ -1,6 +1,6 @@
-# Pyjinn Ren_Lib
+# Pyjinn Lib_Rem
 
-**Version:** 0.2.2-alpha\
+**Version:** 0.2.3-alpha\
 **Author:** JulianIsLost\
 **Date:** 15.08.2025
 
@@ -21,7 +21,7 @@ Before you start, make sure you have:
 
 ## Usage
 
-- Download the **ren_lib.py** file
+- Download the **lib_ren.py** file
 - Place it directly in the minescript folder
 - Import the module into your script:
   
