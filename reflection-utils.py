@@ -27,6 +27,21 @@ def get_private_field_value(obj, intermediary):
     
     return field.get(obj)
 
+def call_private_constructor(obj, *args):
+    cls = obj.getClass()
+    
+    param_types = Array.newInstance(type(Clazz), len(args))
+    params = Array.newInstance(type(Obj), len(args))
+    
+    for i, arg in enumerate(args):
+        Array.set(param_types, i, arg.getClass())
+        Array.set(params, i, arg)
+    
+    constructor = cls.getDeclaredConstructor(param_types)
+    constructor.setAccessible(True)
+    
+    return constructor.newInstance(params)
+
 def find_method(cls, intermediary, param_types):
     while cls is not None:
         try:
