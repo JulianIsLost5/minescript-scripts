@@ -9,6 +9,7 @@ Items = JavaClass("net.minecraft.world.item.Items")
 RenderType = JavaClass("net.minecraft.client.renderer.RenderType") # type: ignore
 Blocks = JavaClass("net.minecraft.world.level.block.Blocks") # type: ignore
 OverlayTexture = JavaClass("net.minecraft.client.renderer.texture.OverlayTexture")
+ParticleTypes = JavaClass("net.minecraft.core.particles.ParticleTypes")
  
 mc = Minecraft.getInstance()
 
@@ -51,7 +52,10 @@ class WorldRendering():
 
     class WorldText():
         def __init__(self):
-            pass
+
+    @staticmethod
+    def particle(x, y, z):
+        mc.level.addParticle(ParticleTypes.HEART, x, y, z, 0.0, 0.0, 0.0)
 
 # Hud Rendering 
 class HudRendering:
