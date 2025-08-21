@@ -18,7 +18,15 @@ def call_private_method(obj, intermediary, *args):
     
     method.setAccessible(True)
     return method.invoke(obj, params)
+
+def get_private_field_value(obj, intermediary):
+    cls = obj.getClass()
     
+    field = cls.getDeclaredField(intermediary)
+    field.setAccessible(True)
+    
+    return field.get(obj)
+
 def find_method(cls, intermediary, param_types):
     while cls is not None:
         try:
