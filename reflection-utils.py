@@ -1,3 +1,7 @@
+"""
+    Author: JulianIsLost
+    Desc: Library for accessing private fields, methods and constructors
+"""
 Array = JavaClass("java.lang.reflect.Array")
 Clazz = JavaClass("java.lang.Class")
 Obj = JavaClass("java.lang.Object")
