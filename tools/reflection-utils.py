@@ -6,6 +6,7 @@ Array = JavaClass("java.lang.reflect.Array")
 Clazz = JavaClass("java.lang.Class")
 Obj = JavaClass("java.lang.Object")
 
+# Pass the object to call the method on, along with the intermediary mapping of the method and its parameters
 def call_private_method(obj, intermediary, *args):
     cls = obj.getClass()
     
@@ -23,6 +24,7 @@ def call_private_method(obj, intermediary, *args):
     method.setAccessible(True)
     return method.invoke(obj, params)
 
+# Pass the object to get the field on, along with the intermediary mapping of the field
 def get_private_field_value(obj, intermediary):
     cls = obj.getClass()
     
@@ -31,9 +33,8 @@ def get_private_field_value(obj, intermediary):
     
     return field.get(obj)
 
-def call_private_constructor(obj, *args):
-    cls = obj.getClass()
-    
+# Pass the class which has the constructor along with its parameters
+def call_private_constructor(cls, *args)
     param_types = Array.newInstance(type(Clazz), len(args))
     params = Array.newInstance(type(Obj), len(args))
     
@@ -46,7 +47,7 @@ def call_private_constructor(obj, *args):
     
     return constructor.newInstance(params)
 
-def find_method(cls, intermediary, param_types):
+def _find_method(cls, intermediary, param_types):
     while cls is not None:
         try:
             method = cls.getDeclaredMethod(intermediary, param_types)
