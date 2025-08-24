@@ -1,0 +1,59 @@
+Registries = JavaClass("net.minecraft.core.registries.Registries")
+ItemStack = JavaClass("net.minecraft.world.item.ItemStack")
+ResourceLocation = JavaClass("net.minecraft.resources.ResourceLocation")
+Minecraft = JavaClass("net.minecraft.client.Minecraft")
+ItemEnchantments = JavaClass("	net.minecraft.world.item.enchantment.ItemEnchantments")
+EnchantmentHelper = JavaClass("net.minecraft.world.item.enchantment.EnchantmentHelper")
+Mutable = JavaClass("net.minecraft.world.item.enchantment.ItemEnchantments$Mutable")
+Holder = JavaClass("net.minecraft.core.Holder")
+
+mc = Minecraft.getInstance()
+level = mc.level
+
+class ItemHelper():
+    def __init__(self, item_stack: tuple[str, int]|ItemStack, enchantments: dict={}):
+        if isInstance(item_stack, ItemStack):
+            self.item_stack = item_stack
+        else:
+            self.item_stack = ItemStack(self._get_item_registry_entry(item_stack[0]), item_stack[1])
+            for type,level in enchantments.items():
+                self.add_enchantment(type, level)
+    
+    def add_enchantment(self, enchantment_id, level):
+        item_enchantments = EnchantmentHelper.getEnchantmentsForCrafting(self.item_stack)
+            
+        mutable = Mutable(item_enchantments)
+        mutable.upgrade(Holder.direct(self._get_enchantment_registry_entry(enchantment_id)), level)
+        
+        item_enchantments = mutable.toImmutable()
+        EnchantmentHelper.setEnchantments(self.item_stack, item_enchantments)
+        return self
+    
+    def remove_enchantment(self, enchantment_id, level):
+        item_enchantments = EnchantmentHelper.getEnchantmentsForCrafting(self.item_stack)
+            
+        mutable = Mutable(item_enchantments)
+        
+        def predicate(holder):
+            return holder.canSerializeIn(Holder.direct(self._get_enchantment_registry_entry(enchantment_id)))
+        
+        mutable.removeIf(predicate)
+       
+        item_enchantments = mutable.toImmutable()
+        EnchantmentHelper.setEnchantments(self.item_stack, item_enchantments)
+        return self
+    
+    def _get_item_registry_entry(self, item_id):
+        item_key = Registries.ITEM
+        registry_access = level.registryAccess()
+        item_registry = registry_access.lookupOrThrow(item_key)
+        return item_registry.getValue(ResourceLocation.parse(item_id))
+        
+    def _get_enchantment_registry_entry(self, enchantment_id):
+        enchantment_key = Registries.ENCHANTMENT
+        registry_access = level.registryAccess()
+        enchantment_registry = registry_access.lookupOrThrow(enchantment_key)
+        return enchantment_registry.getValue(ResourceLocation.parse(enchantment_id))
+    
+    def get_item_stack(self):
+        return self.item_stack
