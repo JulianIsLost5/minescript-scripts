@@ -13,7 +13,7 @@ level = mc.level
 
 class ItemHelper():
     def __init__(self, item_stack: tuple[str, int]|ItemStack, enchantments: dict={}):
-        if isInstance(item_stack, ItemStack):
+        if type(item_stack) is ItemStack:
             self.item_stack = item_stack
         else:
             self.item_stack = ItemStack(self._get_item_registry_entry(item_stack[0]), item_stack[1])
@@ -36,7 +36,7 @@ class ItemHelper():
         mutable = Mutable(item_enchantments)
         
         def check(entry):
-            return entry.is(self._get_enchantment_registry_entry(enchantment_id))
+            return entry.method_55838(self._get_enchantment_registry_entry(enchantment_id))
         
         mutable.removeIf(Predicate(check))
        
@@ -44,16 +44,17 @@ class ItemHelper():
         EnchantmentHelper.setEnchantments(self.item_stack, item_enchantments)
         return self
     
-    def _get_item_registry_entry(self, item_id):
-        item_key = Registries.ITEM
+    def _get_registry_from_key(self, key):
         registry_access = level.registryAccess()
-        item_registry = registry_access.lookupOrThrow(item_key)
+        registry = registry_access.lookupOrThrow(key)
+        return registry
+    
+    def _get_item_registry_entry(self, item_id):
+        item_registry = self._get_registry_from_key(Registries.ITEM)
         return item_registry.getValue(ResourceLocation.parse(item_id))
         
     def _get_enchantment_registry_entry(self, enchantment_id):
-        enchantment_key = Registries.ENCHANTMENT
-        registry_access = level.registryAccess()
-        enchantment_registry = registry_access.lookupOrThrow(enchantment_key)
+        enchantment_registry = self._get_registry_from_key(Registries.ENCHANTMENT)
         return Holder.direct(enchantment_registry.getValue(ResourceLocation.parse(enchantment_id)))
     
     def get_item_stack(self):
