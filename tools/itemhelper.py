@@ -6,6 +6,7 @@ ItemEnchantments = JavaClass("	net.minecraft.world.item.enchantment.ItemEnchantm
 EnchantmentHelper = JavaClass("net.minecraft.world.item.enchantment.EnchantmentHelper")
 Mutable = JavaClass("net.minecraft.world.item.enchantment.ItemEnchantments$Mutable")
 Holder = JavaClass("net.minecraft.core.Holder")
+Predicate = JavaClass("java.util.function.Predicate")
 
 mc = Minecraft.getInstance()
 level = mc.level
@@ -23,7 +24,7 @@ class ItemHelper():
         item_enchantments = EnchantmentHelper.getEnchantmentsForCrafting(self.item_stack)
             
         mutable = Mutable(item_enchantments)
-        mutable.upgrade(Holder.direct(self._get_enchantment_registry_entry(enchantment_id)), level)
+        mutable.upgrade(self._get_enchantment_registry_entry(enchantment_id), level)
         
         item_enchantments = mutable.toImmutable()
         EnchantmentHelper.setEnchantments(self.item_stack, item_enchantments)
@@ -34,10 +35,10 @@ class ItemHelper():
             
         mutable = Mutable(item_enchantments)
         
-        def predicate(holder):
-            return holder.canSerializeIn(Holder.direct(self._get_enchantment_registry_entry(enchantment_id)))
+        def check(entry):
+            return entry.is(self._get_enchantment_registry_entry(enchantment_id))
         
-        mutable.removeIf(predicate)
+        mutable.removeIf(Predicate(check))
        
         item_enchantments = mutable.toImmutable()
         EnchantmentHelper.setEnchantments(self.item_stack, item_enchantments)
@@ -53,7 +54,7 @@ class ItemHelper():
         enchantment_key = Registries.ENCHANTMENT
         registry_access = level.registryAccess()
         enchantment_registry = registry_access.lookupOrThrow(enchantment_key)
-        return enchantment_registry.getValue(ResourceLocation.parse(enchantment_id))
+        return Holder.direct(enchantment_registry.getValue(ResourceLocation.parse(enchantment_id)))
     
     def get_item_stack(self):
         return self.item_stack
