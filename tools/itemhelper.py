@@ -7,6 +7,7 @@ EnchantmentHelper = JavaClass("net.minecraft.world.item.enchantment.EnchantmentH
 Mutable = JavaClass("net.minecraft.world.item.enchantment.ItemEnchantments$Mutable")
 Holder = JavaClass("net.minecraft.core.Holder")
 Predicate = JavaClass("java.util.function.Predicate")
+ResourceKey = JavaClass("net.minecraft.resources.ResourceKey")
 
 mc = Minecraft.getInstance()
 level = mc.level
@@ -48,14 +49,15 @@ class ItemHelper():
         registry_access = level.registryAccess()
         registry = registry_access.lookupOrThrow(key)
         return registry
-    
+   
     def _get_item_registry_entry(self, item_id):
         item_registry = self._get_registry_from_key(Registries.ITEM)
         return item_registry.getValue(ResourceLocation.parse(item_id))
-        
+   
     def _get_enchantment_registry_entry(self, enchantment_id):
         enchantment_registry = self._get_registry_from_key(Registries.ENCHANTMENT)
-        return Holder.direct(enchantment_registry.getValue(ResourceLocation.parse(enchantment_id)))
+        key = ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.parse(enchantment_id))
+        return enchantment_registry.getOrThrow(key)
     
     def get_item_stack(self):
         return self.item_stack
