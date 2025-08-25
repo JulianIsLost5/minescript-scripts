@@ -1,0 +1,23 @@
+import reflection_utils as ru
+import system.pyj.minescript as m
+
+Minecraft = JavaClass("net.minecraft.client.Minecraft")
+RaidStatus = JavaClass("net.minecraft.world.entity.raid.Raid$RaidStatus")
+Items = JavaClass("net.minecraft.world.item.Items")
+Hand = JavaClass("net.minecraft.world.InteractionHand")
+
+mc = Minecraft.getInstance()
+
+def auto_drink()
+    player = mc.player
+    server = player.getServer()
+    worlds = server.getAllLevels() # iteratable object, have to get roght world
+
+    for world in worlds: # might not work this way
+        raid = world.getRaidAt(player.blockPosition())
+        status = ru.get_private_field_value(raid, "field_19023")
+        if status == RaidStatus.VICTORY:
+            if player.getOffhandItem() == Items.OMINOUS_BOTTLE:
+                mc.gameMode.useItem(player, Hand.OFF_HAND)
+                
+m.set_interval(auto_drink, 1000)
