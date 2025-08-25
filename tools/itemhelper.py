@@ -10,7 +10,6 @@ Predicate = JavaClass("java.util.function.Predicate")
 ResourceKey = JavaClass("net.minecraft.resources.ResourceKey")
 
 mc = Minecraft.getInstance()
-level = mc.level
 
 class ItemHelper():
     def __init__(self, item_stack: tuple[str, int]|ItemStack, enchantments: dict={}):
@@ -31,7 +30,7 @@ class ItemHelper():
         EnchantmentHelper.setEnchantments(self.item_stack, item_enchantments)
         return self
     
-    def remove_enchantment(self, enchantment_id, level):
+    def remove_enchantment(self, enchantment_id):
         item_enchantments = EnchantmentHelper.getEnchantmentsForCrafting(self.item_stack)
             
         mutable = Mutable(item_enchantments)
@@ -46,7 +45,7 @@ class ItemHelper():
         return self
     
     def _get_registry_from_key(self, key):
-        registry_access = level.registryAccess()
+        registry_access = mc.level.registryAccess()
         registry = registry_access.lookupOrThrow(key)
         return registry
    
