@@ -21,13 +21,11 @@ def lock_on(target): # target is subclass of entity
         best_vec = None
         
         arrow_speed = _bow_speed(player)
-        target_speed = target.getSpeed()
         
         arrow_direction = player.getViewVector(1).normalize()
         arrow_velocity = arrow_direction.scale(arrow_speed)
         
-        target_direction = target.getMotionDirection().getUnitVec3()
-        target_velocity = target_direction.scale(target_speed)
+        target_velocity = target.getDeltaMovement()
         
         arrow_pos = player.getEyePosition()
         target_pos = target.getEyePosition()
@@ -42,7 +40,8 @@ def lock_on(target): # target is subclass of entity
             error = target_pos.distanceTo(arrow_pos)
             if error < best_error:
                 best_error = error
-                best_vec =  target_pos.subtract(arrow_pos).normalize().scale(-1).add(arrow_direction)
+                correction = target_pos.subtract(arrow_pos).normalize().scale(0.05)
+                best_vec = arrow_direction.add(correction).normalize()
         
         yaw = Math.toDegrees(Math.atan2(-best_vec.x, best_vec.z))
         pitch = Math.toDegrees(-Math.asin(best_vec.y))
