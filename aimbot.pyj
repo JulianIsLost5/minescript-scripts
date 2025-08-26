@@ -14,6 +14,7 @@ def lock_on(target): # target is subclass of entity
         use_ticks = BowItem.getUseDuration(bow, player) - player.getUseItemRemainingTicks()
         pull = BowItem.getPowerForTime(use_ticks)
         speed = pull * 3.0
+        return speed
         
     def _simulate_interception(player, target, steps):
         best_error = float("inf")
