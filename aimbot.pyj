@@ -2,29 +2,51 @@ import system.pyj.minescript as m
 
 Double = JavaClass("java.lang.Double")
 Minecraft = JavaClass("net.minecraft.client.Minecraft")
+Math = JavaClasa("java.lang.Math")
 BowItem = JavaClass("net.minecraft.world.item.BowItem")
 
 mc = Minecraft.getInstance()
 
 def lock_on(target): # target is subclass of entity
-    def _player_bow(player):
-        return player.getUseItem() # missing: safety logic if bow is not in use
-        
-    def _arrow_velocity(player):
-        bow = _player_bow(player)
+    def _bow_speed(player):
+        bow = player.getUseItem()
         
         use_ticks = BowItem.getUseDuration(bow, player) - player.getUseItemRemainingTicks()
         pull = BowItem.getPowerForTime(use_ticks)
-        return pull * 3.0
+        speed = pull * 3.0
         
-    player_pos = mc.player.position()
-    target_pos = target.position()
-    
-    direction = target.getMotionDirection().getUnitVec3()
-    speed = target.getSpeed()
-    
-    distance = player_pos.distanceTo(target_pos)
-    duration = distance/_arrow_velocity(mc.player)
-    
-    future_pos = target_pos.add(direction.scale(Double(speed)).scale(Double(duration)))
-    m.player_look_at(future_pos.x, future_pos.y, future_pos.z)
+    def _simulate_interception(player, target, steps):
+        best_error = float("inf")
+        best_vec = None
+        
+        arrow_speed = _bow_speed(player)
+        target_speed = target.getSpeed()
+        
+        arrow_direction = player.getViewVector(1).normalize()
+        arrow_velocity = arrow_direction.scale(arrow_speed)
+        
+        target_direction = target.getMotionDirection().getUnitVec3()
+        target_velocity = target_direction.scale(target_speed)
+        
+        arrow_pos = player.getEyePosition()
+        target_pos = target.getEyePosition()
+        
+        for i in range(steps):
+            arrow_pos = arrow_pos.add(arrow_velocity)
+            arrow_velocity = arrow_velocity.scale(0.99)
+            arrow_velocity = arrow_velocity.subtract(0, 0.05, 0)
+            
+            target_pos = target.add(target_velocity)
+            
+            error = target_pos.distanceTo(arrow_pos)
+            if error < best_error:
+                best_error = error
+                best_vec =  target_pos.subtract(arrow_pos).normalize().scale(-1).add(arrow_direction)
+        
+        yaw = Math.toDegrees(Math.atan2(-best_vec.x, best_vec.z))
+        pitch = Math.toDegrees(-Math.asin(best_vec.y))
+        
+        m.player_set_orientation(yaw, pitch)
+        
+    for i in range(10):
+        _simulate_interception(mc.player, target, 200)
