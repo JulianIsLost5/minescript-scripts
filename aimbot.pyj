@@ -37,7 +37,7 @@ def lock_on(target): # target is subclass of entity
             arrow_velocity = arrow_velocity.scale(0.99)
             arrow_velocity = arrow_velocity.subtract(0, 0.05, 0)
             
-            target_pos = target.add(target_velocity)
+            target_pos = target_pos.add(target_velocity)
             
             error = target_pos.distanceTo(arrow_pos)
             if error < best_error:
