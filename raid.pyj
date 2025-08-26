@@ -9,7 +9,7 @@ Level = JavaClass("net.minecraft.world.level.Level")
 
 mc = Minecraft.getInstance()
 
-def auto_drink()
+def auto_drink():
     player = mc.player
     server = player.getServer()
     world = server.getLevel(Level.OVERWORLD)
