@@ -1,0 +1,47 @@
+import system.pyj.minescript as m
+
+Minecraft = JavaClass("net.minecraft.client.Minecraft")
+RaidStatus = JavaClass("net.minecraft.world.entity.raid.Raid$RaidStatus")
+Items = JavaClass("net.minecraft.world.item.Items")
+Hand = JavaClass("net.minecraft.world.InteractionHand")
+EntityType = JavaClass("net.minecraft.world.entity.EntityType")
+AABB = JavaClass("net.minecraft.world.phys.AABB")
+EntitySelector = JavaClass("net.minecraft.world.entity.EntitySelector")
+
+mc = Minecraft.getInstance()
+
+newest_raider = None
+
+def get_private_field_value(obj, intermediary):
+    cls = obj.getClass()
+    
+    field = cls.getDeclaredField(intermediary)
+    field.setAccessible(True)
+    
+    return field.get(obj)
+
+def cache_pillager(range):
+    global newest_raider
+    level = mc.level
+    box = AABB(mc.player.blockPosition()).inflate(range)
+        
+    entities = level.getEntities(EntityType.PILLAGER, box, EntitySelector.NO_SPECTATORS)
+    for entity in entities:
+        try:
+            if entity.tickCount < newest_raider.tickCount:
+                newest_raider = entity
+        except:
+            newest_raider = entity
+
+def auto_drink():
+    global newest_raider
+    cache_pillager(10)
+    if newest_raider is None:
+        return
+    raid = newest_raider.getCurrentRaid()
+    status = get_private_field_value(raid, "field_19023")
+    if status == RaidStatus.VICTORY:
+        if player.getOffhandItem().getItem() == Items.OMINOUS_BOTTLE:
+            mc.gameMode.useItem(player, Hand.OFF_HAND)
+                
+m.set_interval(auto_drink, 1000)
