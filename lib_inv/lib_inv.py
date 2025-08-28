@@ -9,7 +9,7 @@ Math = JavaClass("java.lang.Math")
 
 mc = Minecraft.getInstance()
 
-def click_slot(slot: int, right_button: bool = False):
+def click_slot(slot: int, right_button: bool = False) -> bool:
     screen = mc.screen
     if screen is None:
         return False
@@ -20,7 +20,7 @@ def click_slot(slot: int, right_button: bool = False):
     
     return True
     
-def drop_slot(slot: int):
+def drop_slot(slot: int) -> bool:
     screen = mc.screen
     if screen is None:
         return False
@@ -31,7 +31,7 @@ def drop_slot(slot: int):
     
     return True
 
-def shift_click_slot(slot: int):
+def shift_click_slot(slot: int) -> bool:
     screen = mc.screen
     if screen is None:
         return False
@@ -42,7 +42,7 @@ def shift_click_slot(slot: int):
     
     return True
 
-def swap_slots(slot1: int, slot2: int):
+def swap_slots(slot1: int, slot2: int) -> bool:
     screen = mc.screen
     if screen is None:
         return False
@@ -55,7 +55,7 @@ def swap_slots(slot1: int, slot2: int):
     
     return True
 
-def is_slot_empty(slot: int):
+def is_slot_empty(slot: int) -> bool:
     screen = mc.screen
     if screen is None:
         return False
@@ -80,16 +80,27 @@ def get_item_at_slot(slot: int, container: bool = False):
     
     return slot_stack
     
-def get_empty_slots():
-    player = mc.player
-    inv = player.getInventory()
-    
+def get_empty_slots(container: bool = False):
     empty_slots = []
     
-    for i in range(inv.getContainerSize()):
-        slot_stack = inv.getItem(i)
-        if slot_stack.isEmpty():
-            empty_slots.append(i)
+    if not container:
+        player = mc.player
+        inv = player.getInventory()
+
+        for i in range(inv.getContainerSize()):
+            slot_stack = inv.getItem(i)
+            if slot_stack.isEmpty():
+                empty_slots.append(i)
+    else:
+        screen = mc.screen
+        if screen is None:
+            return None
+        container_menu = screen.getMenu()
+
+        for i in range(container_menu.slots.size()):
+            slot_stack = container_menu.getSlot(i)
+            if slot_stack.isEmpty():
+                empty_slots.append(i)
             
     return empty_slots
 
@@ -111,7 +122,7 @@ def find_item(item_id: str, container: bool = False):
         
     return None
     
-def count_item(item_id: str):
+def count_item(item_id: str) -> int:
     player = mc.player
     inv = player.getInventory()
     
@@ -123,7 +134,7 @@ def count_item(item_id: str):
             count += slot_stack.getCount()
     return count
     
-def is_inventory_full():
+def is_inventory_full() -> bool:
     player = mc.player
     inv = player.getInventory()
     
@@ -133,7 +144,7 @@ def is_inventory_full():
             return False
     return True
     
-def merge_stacks(slot1: int, slot2: int):
+def merge_stacks(slot1: int, slot2: int) -> bool:
     screen = mc.screen
     if screen is None:
         return False
@@ -180,7 +191,7 @@ def compact_inventory():
                 if slot_stack_i.isEmpty():
                     break
 
-def check_for_space(stack_to_insert: ItemStack):
+def check_for_space(stack_to_insert: ItemStack) -> bool:
     player = mc.player
     inv = player.getInventory()
 
@@ -201,7 +212,7 @@ def check_for_space(stack_to_insert: ItemStack):
             
     return False
 
-def select_best_tool(position):
+def select_best_tool(position) -> bool:
     position = BlockPos(*position)
     state = mc.level.getBlockState(position)
     inv = mc.player.getInventory()
