@@ -4,6 +4,7 @@ import system.pyj.minescript as m
 Minecraft = JavaClass("net.minecraft.client.Minecraft")
 ItemStack = JavaClass("net.minecraft.world.item.ItemStack")
 ClickType = JavaClass("net.minecraft.world.inventory.ClickType")
+BlockPos = JavaClass("net.minecraft.core.BlockPos")
 Math = JavaClass("java.lang.Math")
 
 mc = Minecraft.getInstance()
@@ -198,4 +199,25 @@ def check_for_space(stack_to_insert: ItemStack):
         if remaining.isEmpty():
             return True
             
+    return False
+
+def select_best_tool(position):
+    position = BlockPos(*position)
+    state = mc.level.getBlockState(position)
+    inv = mc.player.getInventory()
+    
+    best_speed = 0
+    best_index = None
+    
+    for index in range(inv.getContainerSize()):
+        slot_stack = inv.getItem(index)
+        slot_item = slot_stack.getItem()
+        speed = slot_item.getDestroySpeed(slot_stack, state)
+        if speed > best_speed and slot_item.isCorrectToolForDrops(slot_stack, state):
+            best_speed = speed
+            best_index = index
+    
+    if best_index is not None:
+        inv.pickSlot(best_index)
+        return True
     return False
