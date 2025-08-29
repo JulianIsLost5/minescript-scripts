@@ -10,7 +10,6 @@ Items = JavaClass("net.minecraft.world.item.Items")
 RenderType = JavaClass("net.minecraft.client.renderer.RenderType") # type: ignore
 Blocks = JavaClass("net.minecraft.world.level.block.Blocks") # type: ignore
 OverlayTexture = JavaClass("net.minecraft.client.renderer.texture.OverlayTexture")
-ParticleTypes = JavaClass("net.minecraft.core.particles.ParticleTypes")
 ShapeRenderer = JavaClass("net.minecraft.client.renderer.ShapeRenderer")
 Float = JavaClass("java.lang.Float")
 BlockPos = JavaClass("net.minecraft.core.BlockPos")
@@ -85,8 +84,15 @@ class WorldRendering():
         def __init__(self):
 
     @staticmethod
-    def particle(x, y, z):
-        mc.level.addParticle(ParticleTypes.HEART, x, y, z, 0.0, 0.0, 0.0)
+    def particle(particle_type, position: tuple(double, double, double), force: bool = False, canSpawnOnMinimum: bool = False, velocities: tuple(double, double, double) = (0.0, 0.0, 0.0)) -> bool:
+        """
+        particle_type: fields of ParticleTypes
+        force: When true, forces the particle to spawn regardless of the client’s particle settings
+        canSpawnOnMinimum: When true, this allows the particle to spawn even if the player’s particle settings are set to "Minimal"
+        """
+        
+        mc.level.addParticle(particle_type, force, canSpawnOnMinimum, x, y, z, 0.0, 0.0, 0.0)
+        return True
 
 # Hud Rendering 
 class HudRendering:
