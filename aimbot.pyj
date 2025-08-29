@@ -2,7 +2,7 @@ import system.pyj.minescript as m
 
 Double = JavaClass("java.lang.Double")
 Minecraft = JavaClass("net.minecraft.client.Minecraft")
-Math = JavaClasa("java.lang.Math")
+Math = JavaClass("java.lang.Math")
 BowItem = JavaClass("net.minecraft.world.item.BowItem")
 
 mc = Minecraft.getInstance()
