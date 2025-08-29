@@ -69,7 +69,7 @@ class WorldRendering():
 
         ShapeRenderer.renderLineBox(
             poseStack, 
-            multiBufferSource.getBuffer(get_private_field_value(RenderType, "field_42523")), # DEBUG_QUADS
+            multiBufferSource.getBuffer(_get_private_field_value(RenderType, "field_42523")), # DEBUG_QUADS
             position, 
             *rgba,
             )
@@ -91,7 +91,9 @@ class WorldRendering():
 # Hud Rendering 
 class HudRendering:
     @staticmethod
-    def rectangle(context, position, width, height, color, solid = True):
+    def rectangle(context, position, width, height, color, solid = True) -> bool:
+        if not context:
+            return False
         left_x_position = position[0]-width*0.5
         top_y_position = position[1]-height*0.5
         right_x_position = position[0]+width*0.5
@@ -100,22 +102,30 @@ class HudRendering:
         
         if solid is True:
             context.fill(left_x_position, top_y_position, right_x_position, bottom_y_position, color)
+            return True
         elif solid is False:
             context.renderOutline(left_x_position, top_y_position, width, height, color)
+            return True
 
     @staticmethod
-    def text(context, text, position, text_color):
+    def text(context, text: str, position, text_color) -> bool:
+        if not context:
+            return False
         left_x_position = position[0] - mc.font.width(text)*0.5
         text_color = ARGB.color(*text_color)
     
         context.drawString(mc.font, text, left_x_position, position[1], text_color, False)
+        return True
 
     # Taken from razrcraft
     @staticmethod
-    def item(context, block_id, width, height):
+    def item(context, block_id, width, height) -> bool:
+        if not context:
+            return False
         item = _get_item_from_blockid(block_id)
         
         context.renderItem(item, width, height)
+        return True
 
     class button():
         def __init__(self, position, width, height, text, click_callback): 
