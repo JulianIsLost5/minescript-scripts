@@ -1,3 +1,4 @@
+#!python
 import system.pyj.minescript as m
 
 # Java class imports
@@ -10,12 +11,24 @@ RenderType = JavaClass("net.minecraft.client.renderer.RenderType") # type: ignor
 Blocks = JavaClass("net.minecraft.world.level.block.Blocks") # type: ignore
 OverlayTexture = JavaClass("net.minecraft.client.renderer.texture.OverlayTexture")
 ParticleTypes = JavaClass("net.minecraft.core.particles.ParticleTypes")
+ShapeRenderer = JavaClass("net.minecraft.client.renderer.ShapeRenderer")
+Float = JavaClass("java.lang.Float")
+BlockPos = JavaClass("net.minecraft.core.BlockPos")
+AABB = JavaClass("net.minecraft.world.phys.AABB")
  
 mc = Minecraft.getInstance()
 
-def get_item_from_blockid(block_id: str):
+def _get_item_from_blockid(block_id: str):
     id = ResourceLocation.parse(block_id)
     return BuiltInRegistries.ITEM.getValue(id)
+
+def _get_private_field_value(obj, intermediary):
+    cls = obj.getClass()
+    
+    field = cls.getDeclaredField(intermediary)
+    field.setAccessible(True)
+    
+    return field.get(obj)
 
 # World Rendering Classes
 class WorldRendering():
@@ -42,9 +55,27 @@ class WorldRendering():
         
         bufferSource.endBatch(RenderType.solid())
         
-    class Wireframe():
-        def __init__(self):
-            pass
+    @staticmethod
+    def wireframe(context, position: AABB, rgba: tuple(Float, Float, Float, Float)) -> bool:
+        if not context:
+            return False
+        camera = context.camera()
+        poseStack = context.matrixStack()
+        multiBufferSource =  context.consumers()
+        position = camera.position()
+    
+        poseStack.pushPose()
+        poseStack.translate(-position.x, -position.y, -position.z)
+
+        ShapeRenderer.renderLineBox(
+            poseStack, 
+            multiBufferSource.getBuffer(get_private_field_value(RenderType, "field_42523")), # DEBUG_QUADS
+            position, 
+            *rgba,
+            )
+        poseStack.popPose()
+        return True
+
 
     class WorldLine():
         def __init__(self):
@@ -82,7 +113,7 @@ class HudRendering:
     # Taken from razrcraft
     @staticmethod
     def item(context, block_id, width, height):
-        item = get_item_from_blockid(block_id)
+        item = _get_item_from_blockid(block_id)
         
         context.renderItem(item, width, height)
 
