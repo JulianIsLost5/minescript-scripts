@@ -3,16 +3,17 @@ import system.pyj.minescript as m
 Double = JavaClass("java.lang.Double")
 Minecraft = JavaClass("net.minecraft.client.Minecraft")
 Math = JavaClass("java.lang.Math")
-BowItem = JavaClass("net.minecraft.world.item.BowItem")
 
 mc = Minecraft.getInstance()
 
 def lock_on(target): # target is subclass of entity
     def _bow_speed(player):
         bow = player.getUseItem()
+        if not bow:
+            return None
         
-        use_ticks = BowItem.getUseDuration(bow, player) - player.getUseItemRemainingTicks()
-        pull = BowItem.getPowerForTime(use_ticks)
+        use_ticks = bow.getUseDuration(bow, player) - player.getUseItemRemainingTicks()
+        pull = bow.getPowerForTime(use_ticks)
         speed = pull * 3.0
         return speed
         
