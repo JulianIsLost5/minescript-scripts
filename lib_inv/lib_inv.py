@@ -165,36 +165,6 @@ def merge_stacks(slot1: int, slot2: int) -> bool:
         
     return False
 
-def compact_inventory():
-    player = mc.player
-    inv = player.getInventory()
-    
-    for i in range(inv.getContainerSize()):
-        slot_stack_i = inv.getItem(i)
-        
-        if slot_stack_i.isEmpty():
-            continue
-        
-        for j in range(inv.getContainerSize()):
-            if i == j:
-                continue
-            
-            slot_stack_j = inv.getItem(j)
-            
-            if not ItemStack.isSameItem(slot_stack_i, slot_stack_j):
-                continue
-            
-            transferable = Math.min(slot_stack_i.getCount(), slot_stack_i.getMaxStackSize() - slot_stack_j.getCount())
-            if transferable > 0:
-                slot_stack_j.grow(transferable)
-                slot_stack_i.shrink(transferable)
-                
-                inv.setItem(j, slot_stack_j)
-                inv.setItem(i, slot_stack_i)
-                
-                if slot_stack_i.isEmpty():
-                    break
-
 def check_for_space(stack_to_insert: ItemStack) -> bool:
     player = mc.player
     inv = player.getInventory()
