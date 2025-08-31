@@ -1,5 +1,4 @@
-#!python
-import system.pyj.minescript as m
+from java import *
 
 Minecraft = JavaClass("net.minecraft.client.Minecraft")
 ItemStack = JavaClass("net.minecraft.world.item.ItemStack")
