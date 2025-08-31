@@ -1,0 +1,55 @@
+Minecraft = JavaClass("net.minecraft.client.Minecraft") # type: ignore
+Vec3d = JavaClass("net.minecraft.world.phys.Vec3") # type: ignore
+Math = JavaClass("java.lang.Math") # type: ignore
+Double = JavaClass("java.lang.Double") # type: ignore
+ 
+mc = Minecraft.getInstance()
+
+def get_private_field_value(obj, name): # name in intermediary
+    try:
+        field = obj.getClass().getDeclaredField(name)
+    except:
+        return
+    field.setAccessible(True)
+    return field.get(obj)
+
+def get_view_vector(yaw, pitch):
+    pitchRad = Math.toRadians(pitch)
+    yawRad = Math.toRadians(yaw)
+        
+    x = -Math.cos(pitchRad) * Math.sin(yawRad)
+    y = -Math.sin(pitchRad)
+    z = Math.cos(pitchRad) * Math.cos(yawRad)
+    
+    return Vec3d(x, y, z).normalize()
+
+def teleport(distance):
+    player = mc.player
+    playerX = get_private_field_value(player, "field_3926")
+    playerY = get_private_field_value(player, "field_3940")
+    playerZ = get_private_field_value(player, "field_3924")
+    
+    yaw = get_private_field_value(player, "field_3941")
+    pitch = get_private_field_value(player, "field_3925")
+    
+    if  player.onGround():
+        if pitch >= 0:
+            radians = Math.toRadians(yaw)
+            dx = -Math.sin(radians) * distance
+            dz = Math.cos(radians) * distance
+        
+            player.setPos(playerX + dx, playerY, playerZ + dz)
+        elif pitch < 0:
+            deltaVec = get_view_vector(yaw, pitch).scale(Double(distance))
+            player.setPos(playerX + deltaVec.x, playerY + deltaVec.y, playerZ + deltaVec.z)
+            
+    elif not player.onGround():
+        deltaVec = get_view_vector(yaw, pitch).scale(Double(distance))
+        player.setPos(playerX + deltaVec.x, playerY + deltaVec.y, playerZ + deltaVec.z)
+        
+        
+def on_press_key(event):
+    if event.action == 0 and event.key == 342:  # ALT
+        teleport(3)
+
+add_event_listener("key", on_press_key)
