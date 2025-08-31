@@ -33,6 +33,15 @@ def get_private_field_value(obj, intermediary):
     
     return field.get(obj)
 
+def set_private_field_value(obj, name, value):
+    try:
+        field = obj.getClass().getDeclaredField(name)
+    except:
+        return
+    field.setAccessible(True)
+    field.set(obj, value)
+    print("Updated",field,"to",field.get(obj))
+
 # Pass the class which has the constructor along with its parameters
 def call_private_constructor(cls, *args)
     param_types = Array.newInstance(type(Clazz), len(args))
