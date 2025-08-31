@@ -33,47 +33,11 @@ def _get_private_field_value(obj, intermediary):
 class WorldRendering():
     @staticmethod
     def block(context, target_pos, block):
-        poseStack = context.matrixStack()
-        bufferSource = mc.renderBuffers().bufferSource()
-        
-        dispatcher = mc.getBlockRenderer()
-        
-        blocks_fields = Blocks.getDeclaredFields()
-        for blocks_field in blocks_fields:
-            if blocks_field.getName() == block:
-                state = blocks_field.defaultBlockState()
-        
-        camera = context.camera()
-        camera_pos = camera.getPosition()
-        
-        poseStack.pushPose()
-        poseStack.translate(target_pos.x - camera_pos.x, target_pos.y - camera_pos.y, target_pos.z - camera_pos.z)
-        
-        dispatcher.renderSingleBlock(state, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY)
-        poseStack.popPose()
-        
-        bufferSource.endBatch(RenderType.solid())
+        pass
         
     @staticmethod
     def wireframe(context, position: AABB, rgba: tuple(Float, Float, Float, Float)) -> bool:
-        if not context:
-            return False
-        camera = context.camera()
-        poseStack = context.matrixStack()
-        multiBufferSource =  context.consumers()
-        position = camera.position()
-    
-        poseStack.pushPose()
-        poseStack.translate(-position.x, -position.y, -position.z)
-
-        ShapeRenderer.renderLineBox(
-            poseStack, 
-            multiBufferSource.getBuffer(_get_private_field_value(RenderType, "field_42523")), # DEBUG_QUADS
-            position, 
-            *rgba,
-            )
-        poseStack.popPose()
-        return True
+        pass
 
 
     class WorldLine():
@@ -82,6 +46,7 @@ class WorldRendering():
 
     class WorldText():
         def __init__(self):
+            pass
 
     @staticmethod
     def particle(particle_type, position: tuple(double, double, double), force: bool = False, canSpawnOnMinimum: bool = False, velocities: tuple(double, double, double) = (0.0, 0.0, 0.0)) -> bool:
@@ -98,30 +63,11 @@ class WorldRendering():
 class HudRendering:
     @staticmethod
     def rectangle(context, position, width, height, color, solid = True) -> bool:
-        if not context:
-            return False
-        left_x_position = position[0]-width*0.5
-        top_y_position = position[1]-height*0.5
-        right_x_position = position[0]+width*0.5
-        bottom_y_position = position[1]+height*0.5
-        color = ARGB.color(*color)
-        
-        if solid is True:
-            context.fill(left_x_position, top_y_position, right_x_position, bottom_y_position, color)
-            return True
-        elif solid is False:
-            context.renderOutline(left_x_position, top_y_position, width, height, color)
-            return True
+        pass
 
     @staticmethod
     def text(context, text: str, position, text_color) -> bool:
-        if not context:
-            return False
-        left_x_position = position[0] - mc.font.width(text)*0.5
-        text_color = ARGB.color(*text_color)
-    
-        context.drawString(mc.font, text, left_x_position, position[1], text_color, False)
-        return True
+        pass
 
     # Taken from razrcraft
     @staticmethod
