@@ -1,3 +1,7 @@
+"""
+    Author: JulianIsLost
+    Desc: Library for rendering operations
+"""
 #!python
 import system.pyj.minescript as m
 
@@ -56,7 +60,15 @@ def _call_private_method(obj, intermediary, *args):
 class WorldRendering():
     
     @staticmethod
-    def block(context: WorldRenderContext, target_pos: tuple(double, double, double), block: str):
+    def block(context: WorldRenderContext, target_pos: tuple(float, float, float), block: str):
+        """
+        Render a single block at a specific position in the world.
+        
+        Args:
+            context: The world render context.
+            target_pos: 3D coordinates of the block.
+            block: Registry ID of the block to render.
+        """
         target_pos = Vec3(*target_pos)
         
         poseStack  = context.matrixStack()
@@ -84,7 +96,15 @@ class WorldRendering():
         bufferSource.endBatch(RenderType.solid())
         
     @staticmethod
-    def wireframe(context: WorldRenderContext, bounds: tuple(double, double, double, double, double, double), rgba: tuple(int, int, int, int)):
+    def wireframe(context: WorldRenderContext, bounds: tuple(float, float, float, float, float, float), rgba: tuple(int, int, int, int)):
+        """
+        Render a wireframe box in the world.
+        
+        Args:
+            context: The world render context.
+            bounds: 6-tuple defining the AABB (minX, minY, minZ, maxX, maxY, maxZ).
+            rgba: Color in RGBA format (0-255 per channel).
+        """
         box = AABB(*bounds)
         
         camera = context.camera()
@@ -101,7 +121,16 @@ class WorldRendering():
         poseStack.popPose()
 
     @staticmethod
-    def line(context: WorldRenderContext, beginning: tuple(doube, double, double), end: tuple(doube, double, double), rgba: tuple(int, int, int, int)):
+    def line(context: WorldRenderContext, beginning: tuple(float, float, float), end: tuple(float, float, float), rgba: tuple(int, int, int, int)):
+        """
+        Draw a line between two points in the world.
+        
+        Args:
+            context: The world render context.
+            beginning: 3D coordinates of the start point.
+            end: 3D coordinates of the end point.
+            rgba: Color in RGBA format (0-255 per channel).
+        """
         camera = context.camera()
         poseStack = context.matrixStack()
         multiBufferSource = context.consumers()
@@ -122,7 +151,18 @@ class WorldRendering():
         poseStack.popPose()
         
     @staticmethod
-    def text(context: WorldRenderContext, target_pos: tuple(doube, double, double), tex: str, rgba: tuple(int, int, int, int), size: double = 1, visible_trough_objects: bool = False):
+    def text(context: WorldRenderContext, target_pos: tuple(float, float, float), text: str, rgba: tuple(int, int, int, int), size: float = 1, visible_trough_objects: bool = False):
+        """
+        Render floating text in the world.
+        
+        Args:
+            context: The world render context.
+            target_pos: 3D coordinates where text will appear.
+            text: The string to render.
+            rgba: Text color in RGBA format (0-255 per channel).
+            size: Scaling factor of the text.
+            visible_trough_objects: If True, text is visible through walls/blocks.
+        """
         color = ARGB.color(rgba[3], rgba[0], rgba[1], rgba[2])
         
         camera = context.camera()
@@ -144,26 +184,15 @@ class WorldRendering():
         poseStack.popPose()
 
     @staticmethod
-    def particle(particle_type: ParticleEffect, position: tuple(doube, double, double), force: bool = False, canSpawnOnMinimum: bool = False, velocities = (0.0, 0.0, 0.0)):
+    def particle(particle_type: ParticleEffect, position: tuple(float, float, float), force: bool = False, canSpawnOnMinimum: bool = False, velocities: tuple(float, float, float) = (0.0, 0.0, 0.0)):
         """
-        particle_type: fields of ParticleTypes
-        force: When true, forces the particle to spawn regardless of the client’s particle settings
-        canSpawnOnMinimum: When true, this allows the particle to spawn even if the player’s particle settings are set to "Minimal"
-        """
+        Spawn a particle effect in the world.
         
-        mc.level.addParticle(particle_type, force, canSpawnOnMinimum, *position, *velocities)
-
-# Hud Rendering 
-class HudRendering:
-    @staticmethod
-    def rectangle(context, position, width, height, color, solid = True) -> bool:
-        pass
-
-    @staticmethod
-    def text(context, text: str, position, text_color) -> bool:
-        pass
-
-    @staticmethod
-    def item(context, block_id, width, height) -> bool:
-        pass
-                
+        Args:
+            particle_type: Particle type from ParticleTypes.
+            position: 3D coordinates for particle spawn.
+            force: Force spawn regardless of client settings.
+            canSpawnOnMinimum: Allow spawn even if particle settings are minimal.
+            velocities: Velocity vector for the particle (x, y, z).
+        """
+        mc.level.addParticle(particle_type, force, canSpawnOnMinimum, *position, *velocities)      
