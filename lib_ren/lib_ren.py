@@ -101,7 +101,7 @@ class WorldRendering():
         poseStack.popPose()
 
     @staticmethod
-    def line(context, beginning, end, rgba):
+    def line(context: WorldRenderContext, beginning: tuple(doube, double, double), end: tuple(doube, double, double), rgba: tuple(int, int, int, int)):
         camera = context.camera()
         poseStack = context.matrixStack()
         multiBufferSource = context.consumers()
@@ -122,7 +122,7 @@ class WorldRendering():
         poseStack.popPose()
         
     @staticmethod
-    def text(context, target_pos, text, rgba, size: int = 1, visible_trough_objects: bool = False):
+    def text(context: WorldRenderContext, target_pos: tuple(doube, double, double), tex: str, rgba: tuple(int, int, int, int), size: double = 1, visible_trough_objects: bool = False):
         color = ARGB.color(rgba[3], rgba[0], rgba[1], rgba[2])
         
         camera = context.camera()
@@ -144,7 +144,7 @@ class WorldRendering():
         poseStack.popPose()
 
     @staticmethod
-    def particle(particle_type, position, force: bool = False, canSpawnOnMinimum: bool = False, velocities = (0.0, 0.0, 0.0)) -> bool:
+    def particle(particle_type: ParticleEffect, position: tuple(doube, double, double), force: bool = False, canSpawnOnMinimum: bool = False, velocities = (0.0, 0.0, 0.0)):
         """
         particle_type: fields of ParticleTypes
         force: When true, forces the particle to spawn regardless of the client’s particle settings
@@ -152,7 +152,6 @@ class WorldRendering():
         """
         
         mc.level.addParticle(particle_type, force, canSpawnOnMinimum, *position, *velocities)
-        return True
 
 # Hud Rendering 
 class HudRendering:
