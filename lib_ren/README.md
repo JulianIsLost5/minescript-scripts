@@ -1,6 +1,6 @@
 # Pyjinn Lib_Ren
 
-**Author:** JulianIsLost\
+**Author:** JulianIsLost
 
 User-friendly API for performing rendering operations in Minecraft using [Minescripts Pyjinn](https://minescript.net/pyjinn/).  
 This module should be imported by other scripts and not run directly.
