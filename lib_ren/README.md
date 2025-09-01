@@ -1,8 +1,6 @@
 # Pyjinn Lib_Ren
 
-**Version:** 0.2.3-alpha\
 **Author:** JulianIsLost\
-**Date:** 15.08.2025
 
 User-friendly API for performing rendering operations in Minecraft using [Minescripts Pyjinn](https://minescript.net/pyjinn/).  
 This module should be imported by other scripts and not run directly.
@@ -14,7 +12,7 @@ This module should be imported by other scripts and not run directly.
 Before you start, make sure you have:
 
 - **Fabric** mod loader configured
-- **Minescript 5.x** installed
+- **Minescript 5.0b5+** installed
 - **Mappings** installed
 
 ---
@@ -26,7 +24,7 @@ Before you start, make sure you have:
 - Import the module into your script:
   
   ```python
-  from ren_lib import WorldRendering, HudRendering
+  from ren_lib import WorldRendering
   ```
 - There is no need to import all classes, just the ones needed
 - Use the classes and methods as documented below
@@ -39,102 +37,106 @@ Before you start, make sure you have:
 
 Classes for rendering in the world
 
-- **block(context, target_pos: Vec3, block: str)**
+- **block(context: WorldRenderContext, target_pos: tuple(float, float, float), block: str)**
   
   Renders a vanilla block into the world
 
-  - **context:** `GuiGraphics` — The context passed by the RenderCallback.
-  - **target_pos:** `Vec3` - The position of the rendered block.
-  - **block:** `str` - Search the block in [this classes’](https://mappings.dev/1.21.8/net/minecraft/world/level/block/Blocks.html) fields.
-  
-- **Wireframe()**
-  Renders a wireframe of custom size into the world
-  
-- **WorldLine()**
-  Renders a line into the world
-
-- **WorldText()**
-  Renders a text into the world
-
-### HudRendering
-
-The `HudRendering` class provides methods for drawing shapes, text, and interactive elements on the player's Hud.
-
-
-- **rectangle(context, position: Tuple[int, int], width: int, height: int, color: Tuple[int, int, int, int], solid: bool = True)**
-
-   Draws a rectangle on the Hud.
-
-   - **context:** `GuiGraphics` — The context passed by the RenderCallback.
-   - **position:** `(x, y)` — The center coordinates of the rectangle.
-   - **width:** `int` — Width in pixels.
-   - **height:** `int` — Height in pixels.
-   - **color:** `(alpha, red, green, blue)` — ARGB color values (0–255).
-   - **solid:** `bool` — Whether the rectangle is filled (`True`) or outlined (`False`).
-
-   Example:
-   ```python
-   HudRendering.rectangle(context, (50, 20), 80, 10, (255, 255, 0, 0), True)
-   ```
-   
-- **text(context, text: str, position: Tuple[int, int], text_color: Tuple[int, int, int, int])**
-  
-   Draws a text on the Hud.
-  
-   - **context:** `GuiGraphics` — The context passed by the RenderCallback.
-   - **text:** `str` - The text to be drawn.
-   - **position:** `(x, y)` — The center coordinates of the rectangle.
-   - **text_color:** `(alpha, red, green, blue)` — ARGB color values (0–255).
-
-   Example:
-   ```python
-   HudRendering.text(context, "Example Text", (50, 20), (255, 255, 0, 0))
-   ```
-  
-- **item(context, block_id: str, width: int, height: int)**
-
-  Renders an item on the Hud
-
-  - **context:** `GuiGraphics` — The context passed by the RenderCallback.
-  - **block_id:** `minecraft:block` - The internal block id.
-  - **width, height:** Icon size.
-
-  Example:
   ```python
-  HudRender.item(context, "minecraft:stone", 10, 10)
+  from lib_ren import WorldRendering
+
+  WorldRenderEvents = JavaClass("net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents") # type: ignore
+  WorldRenderEventsLast = JavaClass("net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents$Last") # type: ignore
+
+  def on_press_key(event):
+      if event.action == 0 and event.key == 342:  # ALT
+          callback.cancel()
+
+  def on_world_render_last(context):
+      WorldRendering.block(context, (10, -60, 4), "minecraft:dirt")
+
+  add_event_listener("key", on_press_key)
+  callback = ManagedCallback(on_world_render_last)
+  WorldRenderEvents.LAST.register(WorldRenderEventsLast(callback))
+  ```
+
+  
+- ** wireframe(context: WorldRenderContext, bounds: tuple(float, float, float, float, float, float), rgba: tuple(int, int, int, int))**
+  
+  Renders a wireframe of custom size and color into the world
+
+  ```python
+  from lib_ren import WorldRendering
+
+  WorldRenderEvents = JavaClass("net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents") # type: ignore
+  WorldRenderEventsLast = JavaClass("net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents$Last") # type: ignore
+
+  def on_press_key(event):
+      if event.action == 0 and event.key == 342:  # ALT
+          callback.cancel()
+
+  def on_world_render_last(context):
+      WorldRendering.wireframe(context, (10, -60, 4, 11, -69, 5), (255, 0, 0, 255))
+
+  add_event_listener("key", on_press_key)
+  callback = ManagedCallback(on_world_render_last)
+  WorldRenderEvents.LAST.register(WorldRenderEventsLast(callback))
   ```
   
-  Note:
-   This method was taken in its entirety from [RazrCraft](https://github.com/R4z0rX)
-
-- **button(position: Tuple[int, int], width: int, height: int, text: str, text_color: Tuple[int, int, int, int], button_color: Tuple[int, int, int, int], click_callback: Callable)**
-
-  Unlike the other Hud methods, `button` is a **subclass** and needs to be instantiated using the constructor. Then its `render()` method needs to be called in the render loop. (Use example below as reference)
-   - **position:** `(x, y)` - The center coordinates of the button.
-   - **width, height:** Button size.
-   - **text:** Label displayed on the button.
-   - **text_color:** ARGB for the label text.
-   - **button_color** ARGB for the button bsckground.
-   - **click_callback** Function called when the button is clicked.
- 
-   Example:
-   ```python
-   HudRenderCallback = JavaClass("net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback") # type: ignore
-   
-   def clicked():
-       print("Clicked!")
-
-   example_button = HudRendering.button((50, 20), 80, 20, "Example Button", (255, 0, 0, 0), (204, 0, 138, 255), clicked)
-
-   def on_hud_render(context, tickDelta):
-       example_button.render(context)
-
-   HudRenderCallback.EVENT.register(HudRenderCallback(on_hud_render))
-   add_event_listener("tick", lambda e: None)
-   ```
+- **line(context: WorldRenderContext, beginning: tuple(float, float, float), end: tuple(float, float, float), rgba: tuple(int, int, int, int))**
   
-- **Cimg()**\
-  Renders a custom image on the HUD
+  Renders a colored line between to coordinates into the world
+
+  ```python
+  from lib_ren import WorldRendering
+
+  WorldRenderEvents = JavaClass("net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents") # type: ignore
+  WorldRenderEventsLast = JavaClass("net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents$Last") # type: ignore
+
+  def on_press_key(event):
+      if event.action == 0 and event.key == 342:  # ALT
+          callback.cancel()
+
+  def on_world_render_last(context):
+      WorldRendering.line(context, (10, -60, 4), (15, -58, 4), (0, 0, 0, 255))
+
+  add_event_listener("key", on_press_key)
+  callback = ManagedCallback(on_world_render_last)
+  WorldRenderEvents.LAST.register(WorldRenderEventsLast(callback))
+  ```
+
+- **text(context: WorldRenderContext, target_pos: tuple(float, float, float), text: str, rgba: tuple(int, int, int, int), size: float = 1, visible_trough_objects: bool = False)**
+  
+  Renders colored text into the world at a given position
+
+  ```python
+  from lib_ren import WorldRendering
+
+  WorldRenderEvents = JavaClass("net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents") # type: ignore
+  WorldRenderEventsLast = JavaClass("net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents$Last") # type: ignore
+
+  def on_press_key(event):
+      if event.action == 0 and event.key == 342:  # ALT
+          callback.cancel()
+
+  def on_world_render_last(context):
+      WorldRendering.text(context, (10, -60, 4), "Hello World", (0, 0, 0, 255))
+
+  add_event_listener("key", on_press_key)
+  callback = ManagedCallback(on_world_render_last)
+  WorldRenderEvents.LAST.register(WorldRenderEventsLast(callback))
+  ```
+
+- **particle(particle_type: ParticleEffect, position: tuple(float, float, float), force: bool = False, canSpawnOnMinimum: bool = False, velocities: tuple(float, float, float) = (0.0, 0.0, 0.0))**
+  
+  Renders a particle into the world
+
+  ```python
+  from lib_ren import WorldRendering
+
+  ParticleTypes = JavaClass("net.minecraft.core.particles.ParticleTypes") # type: ignore
+
+  WorldRendering.particle(ParticleTypes.HEART, (10, -60, 4))
+  ```
 
 ## Useful Links
 
