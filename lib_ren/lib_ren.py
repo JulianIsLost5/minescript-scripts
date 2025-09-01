@@ -3,60 +3,155 @@ import system.pyj.minescript as m
 
 # Java class imports
 Minecraft = JavaClass("net.minecraft.client.Minecraft") # type: ignore
-ARGB = JavaClass("net.minecraft.util.ARGB") # type: ignore
-BuiltInRegistries = JavaClass("net.minecraft.core.registries.BuiltInRegistries")
-ResourceLocation = JavaClass("net.minecraft.resources.ResourceLocation")
-Items = JavaClass("net.minecraft.world.item.Items")
 RenderType = JavaClass("net.minecraft.client.renderer.RenderType") # type: ignore
 Blocks = JavaClass("net.minecraft.world.level.block.Blocks") # type: ignore
-OverlayTexture = JavaClass("net.minecraft.client.renderer.texture.OverlayTexture")
-ShapeRenderer = JavaClass("net.minecraft.client.renderer.ShapeRenderer")
-Float = JavaClass("java.lang.Float")
-BlockPos = JavaClass("net.minecraft.core.BlockPos")
-AABB = JavaClass("net.minecraft.world.phys.AABB")
+OverlayTexture = JavaClass("net.minecraft.client.renderer.texture.OverlayTexture") # type: ignore
+ShapeRenderer = JavaClass("net.minecraft.client.renderer.ShapeRenderer") # type: ignore
+Registries = JavaClass("net.minecraft.core.registries.Registries") # type: ignore
+ResourceLocation = JavaClass("net.minecraft.resources.ResourceLocation") # type: ignore
+AABB = JavaClass("net.minecraft.world.phys.AABB") # type: ignore
+ARGB = JavaClass("net.minecraft.util.ARGB") # type: ignore
+DebugRenderer = JavaClass("net.minecraft.client.renderer.debug.DebugRenderer") # type: ignore
+
+Vec3 = JavaClass("net.minecraft.world.phys.Vec3") # type: ignore
+
+
+Array = JavaClass("java.lang.reflect.Array") # type: ignore
+Clazz = JavaClass("java.lang.Class") # type: ignore
+Obj = JavaClass("java.lang.Object") # type: ignore
+
+
+Float = JavaClass("java.lang.Float") # type: ignore
  
 mc = Minecraft.getInstance()
 
-def _get_item_from_blockid(block_id: str):
-    id = ResourceLocation.parse(block_id)
-    return BuiltInRegistries.ITEM.getValue(id)
+def _get_registry_from_key(key):
+        registry_access = mc.level.registryAccess()
+        registry = registry_access.lookupOrThrow(key)
+        return registry
+   
+def _get_registry_entry(key, id):
+    registry = _get_registry_from_key(key)
+    return registry.getValue(ResourceLocation.parse(id))
 
-def _get_private_field_value(obj, intermediary):
+def _call_private_method(obj, intermediary, *args):
     cls = obj.getClass()
     
-    field = cls.getDeclaredField(intermediary)
-    field.setAccessible(True)
+    param_types = Array.newInstance(type(Clazz), len(args))
+    params = Array.newInstance(type(Obj), len(args))
     
-    return field.get(obj)
+    for i, arg in enumerate(args):
+        Array.set(param_types, i, arg.getClass())
+        Array.set(params, i, arg)
+        
+    method = cls.getDeclaredMethod(intermediary, param_types)
+    if method is None:
+        return 
+    
+    method.setAccessible(True)
+    return method.invoke(obj, params)
+
 
 # World Rendering Classes
 class WorldRendering():
+    
     @staticmethod
-    def block(context, target_pos, block):
-        pass
+    def block(context: WorldRenderContext, target_pos: tuple(double, double, double), block: str):
+        target_pos = Vec3(*target_pos)
+        
+        poseStack  = context.matrixStack()
+        bufferSource = mc.renderBuffers().bufferSource()
+    
+        dispatcher = mc.getBlockRenderer()
+        
+        block = _get_registry_entry(Registries.BLOCK, block)
+        
+        state = block.defaultBlockState()
+        camera = context.camera() 
+    
+        cameraPos = camera.getPosition()
+    
+        poseStack.pushPose()
+        poseStack.translate(
+            target_pos.x - cameraPos.x,
+            target_pos.y - cameraPos.y,
+            target_pos.z - cameraPos.z
+        )
+    
+        dispatcher.renderSingleBlock(state, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY)
+        poseStack.popPose()
+    
+        bufferSource.endBatch(RenderType.solid())
         
     @staticmethod
-    def wireframe(context, position: AABB, rgba: tuple(Float, Float, Float, Float)) -> bool:
-        pass
+    def wireframe(context: WorldRenderContext, bounds: tuple(double, double, double, double, double, double), rgba: tuple(int, int, int, int)):
+        box = AABB(*bounds)
+        
+        camera = context.camera()
+        poseStack = context.matrixStack()
+        multiBufferSource = context.consumers()
+        vertexConsumer = multiBufferSource.getBuffer(RenderType.lines())
+        
+        position = camera.position()
+    
+        poseStack.pushPose()
+        poseStack.translate(-position.x, -position.y, -position.z)
 
-
-    class WorldLine():
-        def __init__(self):
-            pass
-
-    class WorldText():
-        def __init__(self):
-            pass
+        ShapeRenderer.renderLineBox(poseStack, vertexConsumer, box, Float(rgba[0]/255), Float(rgba[1]/255), Float(rgba[2]/255), Float(rgba[3]/255))
+        poseStack.popPose()
 
     @staticmethod
-    def particle(particle_type, position: tuple(double, double, double), force: bool = False, canSpawnOnMinimum: bool = False, velocities: tuple(double, double, double) = (0.0, 0.0, 0.0)) -> bool:
+    def line(context, beginning, end, rgba):
+        camera = context.camera()
+        poseStack = context.matrixStack()
+        multiBufferSource = context.consumers()
+        vertexConsumer = multiBufferSource.getBuffer(RenderType.debugLineStrip(10))
+        
+        position = camera.position()
+    
+        poseStack.pushPose()
+        poseStack.translate(-position.x, -position.y, -position.z)
+
+        poses = poseStack.last().pose()
+
+        vertexConsumer.addVertex(poses, *beginning).setColor(*rgba).setNormal(0, 1, 0)
+        _call_private_method(vertexConsumer, "method_60806")
+        vertexConsumer.addVertex(poses, *end).setColor(*rgba).setNormal(0, 1, 0)
+        _call_private_method(vertexConsumer, "method_60806")
+        
+        poseStack.popPose()
+        
+    @staticmethod
+    def text(context, target_pos, text, rgba, size: int = 1, visible_trough_objects: bool = False):
+        color = ARGB.color(rgba[3], rgba[0], rgba[1], rgba[2])
+        
+        camera = context.camera()
+        poseStack = context.matrixStack()
+        multiBufferSource = context.consumers()
+    
+        cameraPos = camera.position()
+        
+        poseStack.pushPose()
+        poseStack.translate(
+            target_pos[0] - cameraPos.x,
+            target_pos[1] - cameraPos.y,
+            target_pos[2] - cameraPos.z
+        )
+        poseStack.scale(Float(0.025), Float(0.025), Float(0.025))
+        
+        DebugRenderer.renderFloatingText(poseStack, multiBufferSource, text, *target_pos, color, size, True, 0, visible_trough_objects)
+        
+        poseStack.popPose()
+
+    @staticmethod
+    def particle(particle_type, position, force: bool = False, canSpawnOnMinimum: bool = False, velocities = (0.0, 0.0, 0.0)) -> bool:
         """
         particle_type: fields of ParticleTypes
         force: When true, forces the particle to spawn regardless of the client’s particle settings
         canSpawnOnMinimum: When true, this allows the particle to spawn even if the player’s particle settings are set to "Minimal"
         """
         
-        mc.level.addParticle(particle_type, force, canSpawnOnMinimum, x, y, z, 0.0, 0.0, 0.0)
+        mc.level.addParticle(particle_type, force, canSpawnOnMinimum, *position, *velocities)
         return True
 
 # Hud Rendering 
@@ -69,99 +164,7 @@ class HudRendering:
     def text(context, text: str, position, text_color) -> bool:
         pass
 
-    # Taken from razrcraft
     @staticmethod
     def item(context, block_id, width, height) -> bool:
-        if not context:
-            return False
-        item = _get_item_from_blockid(block_id)
-        
-        context.renderItem(item, width, height)
-        return True
-
-    class button():
-        def __init__(self, position, width, height, text, click_callback): 
-             self.left_x_position = position[0]-width*0.5
-             self.top_y_position = position[1]-height*0.5
-             self.right_x_position = position[0]+width*0.5
-             self.bottom_y_position = position[1]+height*0.5
-             self.width = width
-             self.height = height
-             self.font = mc.font
-             self.text_width = font.width(text)
-             self.text_height = font.lineHeight
-             self.click_callback = click_callback
-             m.add_event_listener("mouse", self.check_for_click)
-             self.text_color = ARGB.color(255, 0, 0, 0) 
-             self.text_shadow = False
-             self.text_component = Component.literal(text)
-             self.button_color = ARGB.color(125, 0, 0, 0) 
-             self.factor = 0.7
-        
-        def set_text_color(self, text_color):
-            self.text_color = ARGB.color(*text_color)
-        
-        def set_text_shadow(self):
-            self.text_shadow = True
-        
-        def text_italic(self):
-            self.text_component = self.text_component.withStyle(ChatFormatting.ITALIC)
-        
-        def text_bold(self):
-            self.text_component = self.text_component.withStyle(ChatFormatting.BOLD)
-        
-        def text_underline(self):
-            self.text_component = self.text_component.withStyle(ChatFormatting.UNDERLINE)
-        
-        def text_strikethrough(self):
-            self.text_component = self.text_component.withStyle(ChatFormatting.STRIKETHROUGH)
-    
-        def set_button_color(self, button_color):
-            self.button_color = ARGB.color(*button_color)
-        
-        def set_onclick_factor(self, factor):
-            self.factor = factor
-
-        def render(self, context):
-            context.fill(self.left_x_position, self.top_y_position, self.right_x_position, self.bottom_y_position, self.button_color)
-            context.drawString(font, self.text_component, int(self.position[0] - self.text_width*0.5), int(self.position[1] + self.text_height*0.5), self.text_color, False)
-    
-        def lighten_color(self):
-            factor = 1/self.factor
-        
-            a = ARGB.alpha(self.button_color)
-            r = ARGB.red(self.button_color)
-            g = ARGB.green(self.button_color)
-            b = ARGB.blue(self.button_color)
-        
-            self.button_color = ARGB.color(a, int(r*factor), int(g*factor), int(b*factor))
-        
-        def darken_color(self):
-            a = ARGB.alpha(self.button_color)
-            r = ARGB.red(self.button_color)
-            g = ARGB.green(self.button_color)
-            b = ARGB.blue(self.button_color)
-        
-            self.button_color = ARGB.color(a, int(r*self.factor), int(g*self.factor), int(b*self.factor))
-    
-        def button_clicked(self):
-            self.darken_color()
-            self.click_callback()
-            m.set_timeout(self.button_unclicked, 250)
-    
-        def button_unclicked(self):
-            self.lighten_color()
-    
-        def check_for_click(self, event):
-            if event.action == 1:
-                scale = mc.getWindow().getGuiScale()
-        
-                x = event.x / scale
-                y = event.y / scale        
-    
-                if self.x_position <= x and x <= self.x_position + self.width and self.y_position <= y and y <= self.y_position + self.height:
-                    self.button_clicked()
-                
-class Cimg():
-    def __init__(self):
         pass
+                
