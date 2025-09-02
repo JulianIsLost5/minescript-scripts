@@ -10,49 +10,70 @@ Math = JavaClass("java.lang.Math")
 
 mc = Minecraft.getInstance()
 
-def click_slot(slot: int, right_button: bool = False) -> bool:
-    screen = mc.screen
-    if screen is None:
-        return False
-    container_menu = screen.getMenu()
+def click_slot(slot: int, right_button: bool = False, container: bool = True) -> bool:
+    if not container:
+        container_id = mc.player.containerMenu.containerId     
+    else:
+        screen = mc.screen
+        if screen is None:
+            return False
+        container_menu = screen.getMenu()
+        container_id = container_menu.containerId
     
     mouse_button = 1 if right_button else 0
-    mc.gameMode.handleInventoryMouseClick(container_menu.containerId, slot, mouse_button, ClickType.PICKUP, mc.player)
+    mc.gameMode.handleInventoryMouseClick(container_id, slot, mouse_button, ClickType.PICKUP, mc.player)
     
     return True
     
-def drop_slot(slot: int, stack: bool = False) -> bool:
-    screen = mc.screen
-    if screen is None:
-        return False
-    container_menu = screen.getMenu()
+def drop_slot(slot: int, stack: bool = False, container: bool = True) -> bool:
+    if not container:
+        container_id = mc.player.containerMenu.containerId     
+    else:
+        screen = mc.screen
+        if screen is None:
+            return False
+        container_menu = screen.getMenu()
+        container_id = container_menu.containerId
     
     mouse_button = 1 if stack else 0
-    mc.gameMode.handleInventoryMouseClick(container_menu.containerId, slot, mouse_button, ClickType.THROW, mc.player)
+    mc.gameMode.handleInventoryMouseClick(container_id, slot, mouse_button, ClickType.THROW, mc.player)
     
     return True
 
-def shift_click_slot(slot: int) -> bool:
-    screen = mc.screen
-    if screen is None:
-        return False
-    container_menu = screen.getMenu()
+def shift_click_slot(slot: int, container: bool = True) -> bool:
+    if not container:
+        container_id = mc.player.containerMenu.containerId     
+    else:
+        screen = mc.screen
+        if screen is None:
+            return False
+        container_menu = screen.getMenu()
+        container_id = container_menu.containerId
     
     mouse_button = 0
-    mc.gameMode.handleInventoryMouseClick(container_menu.containerId, slot, mouse_button, ClickType.QUICK_MOVE, mc.player)
+    mc.gameMode.handleInventoryMouseClick(container_id, slot, mouse_button, ClickType.QUICK_MOVE, mc.player)
     
     return True
 
-def swap_slots(slot1: int, slot2: int) -> bool:
-    screen = mc.screen
-    if screen is None:
-        return False
-    container_menu = screen.getMenu()
+def swap_slots(slot1: int, slot2: int, container: bool = True) -> bool:
+    if not container:
+        container_id = mc.player.containerMenu.containerId     
+    else:
+        screen = mc.screen
+        if screen is None:
+            return False
+        container_menu = screen.getMenu()
+        container_id = container_menu.containerId
     
     mouse_button = 0
-    mc.gameMode.handleInventoryMouseClick(container_menu.containerId, slot1, mouse_button, ClickType.PICKUP, mc.player)
-    mc.gameMode.handleInventoryMouseClick(container_menu.containerId, slot2, mouse_button, ClickType.PICKUP, mc.player)
-    mc.gameMode.handleInventoryMouseClick(container_menu.containerId, slot1, mouse_button, ClickType.PICKUP, mc.player)
+    mc.gameMode.handleInventoryMouseClick(container_id, slot1, mouse_button, ClickType.PICKUP, mc.player)
+    mc.gameMode.handleInventoryMouseClick(container_id, slot2, mouse_button, ClickType.PICKUP, mc.player)
+    mc.gameMode.handleInventoryMouseClick(container_id, slot1, mouse_button, ClickType.PICKUP, mc.player)
+    
+    return True
+
+def inventory_hotbar_swap(inv_slot: int, hotbar_slot: int) -> bool:
+    mc.gameMode.handleInventoryMouseClick(mc.player.containerMenu.containerId, inv_slot, hotbar_slot, ClickType.SWAP, mc.player)
     
     return True
 
