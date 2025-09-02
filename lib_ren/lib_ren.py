@@ -200,6 +200,8 @@ class WorldRendering():
         mc.level.addParticle(particle_type, force, canSpawnOnMinimum, *position, *velocities)      
         
 class HudRendering():
+
+    @staticmethod
     def text(context: DrawContext, text: str, position: tuple(int, int), rgba: tuple(int, int, int, int), shadow:bool = False, obfsucated:bool = False, strikethrough:bool = False, underline:bool = False, italic:bool = False):
         """
         Renders a text on the HUD.
