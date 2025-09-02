@@ -1,4 +1,6 @@
 from java import *
+import minescript as m
+m.set_default_executor(m.script_loop)
 
 Minecraft = JavaClass("net.minecraft.client.Minecraft")
 ItemStack = JavaClass("net.minecraft.world.item.ItemStack")
