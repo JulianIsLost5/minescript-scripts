@@ -112,7 +112,7 @@ def find_item(item_id: str, container: bool = False):
         
     for i in range(inv.getContainerSize()):
         slot_stack = inv.getItem(i)
-        if slot_stack.item == item_id:
+        if str(slot_stack.getItem()) == item_id:
             return i
         
     return None
