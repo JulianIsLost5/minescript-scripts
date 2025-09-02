@@ -196,3 +196,38 @@ class WorldRendering():
             velocities: Velocity vector for the particle (x, y, z).
         """
         mc.level.addParticle(particle_type, force, canSpawnOnMinimum, *position, *velocities)      
+        
+class HudRendering():
+    def text(context: DrawContext, text: str, position: tuple(int, int), rgba: tuple(int, int, int, int), shadow:bool = False, obfsucated:bool = False, strikethrough:bool = False, underline:bool = False, italic:bool = False):
+        """
+        Renders a text on the HUD.
+        
+        Args:
+            context: The draw context.
+            text: The string to render
+            position: 2D coordinates where text will appear.
+            rgba: Color in RGBA format (0-255 per channel).
+            shadow: If text is rendered with shaow
+            obfuscated: If text is rendered with this style.
+            strikethrough: If text is rendered with this style.
+            underline: If text is rendered with this style.
+            italic: If text is rendered with this style.
+        """
+        color = ARGB.color(rgba[3], rgba[0], rgba[1], rgba[2])
+        styles = []
+        text = Component.literal(text)
+    
+        if obfsucated:
+            styles.append(ChatFormatting.OBFUSCATED)
+        if strikethrough:
+            styles.append(ChatFormatting.STRIKETHROUGH)
+        if underline:
+            styles.append(ChatFormatting.UNDERLINE)
+        if italic:
+            styles.append(ChatFormatting.ITALIC)
+    
+        if len(styles) > 0:
+            for style in styles:
+                text = text.withStyle(style)
+                
+        context.drawString(mc.font, text, *position, color, shadow)
