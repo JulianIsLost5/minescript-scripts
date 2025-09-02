@@ -1,8 +1,8 @@
 # Lib_Inv
 
-**Version:** 1.0.0\
+**Version:** 1.1.0\
 **Author:** JulianIsLost\
-**Date:** 31.08.2025
+**Date:** 03.09.2025
 
 User-friendly API for performing invenotry operations in Minecraft.  
 This module should be imported by other scripts and not run directly.
@@ -34,7 +34,7 @@ Before you start, make sure you have:
 
 ## Methods
 
-- **click_slot(slot: int, right_button: bool = False) -> bool**
+- **click_slot(slot: int, right_button: bool = False, container: bool = True) -> bool**
 
   Clicks on an inventory slot.
 
@@ -44,7 +44,7 @@ Before you start, make sure you have:
 
 ---
 
-- **drop_slot(slot: int, stack: bool = False) -> bool**
+- **drop_slot(slot: int, stack: bool = False, container: bool = True) -> bool**
 
   Drops an item from the specified slot.
 
@@ -54,7 +54,7 @@ Before you start, make sure you have:
 
 ---
 
-- **shift_click_slot(slot: int) -> bool**
+- **shift_click_slot(slot: int, container: bool = True) -> bool**
 
   Performs a shift-click on a slot (moves item between inventories).
 
@@ -63,13 +63,23 @@ Before you start, make sure you have:
 
 ---
 
-- **swap_slots(slot1: int, slot2: int) -> bool**
+- **swap_slots(slot1: int, slot2: int, container: bool = True) -> bool**
 
   Swaps the contents of two inventory slots.
 
   - **slot1:** `int` — The first slot index.
   - **slot2:** `int` — The second slot index.
   - **returns:** `bool` — `True` if successful, `False` otherwise.
+
+---
+
+- **inventory_hotbar_swap(inv_slot: int, hotbar_slot: int) -> bool**
+
+  Swaps a slot of the inventory with a slot of the hotbar
+
+  - **inv_slot:** `int` — The slot to swap to the hotbar.
+  - **hotbar_slot:** `int` — The slot to swap to the inventory.
+  - **returns:** `bool` — `True` if done.
 
 ---
 
