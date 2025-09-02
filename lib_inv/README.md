@@ -1,6 +1,6 @@
 # Lib_Inv
 
-**Version:** 1.1.0\
+**Version:** 1.1.1\
 **Author:** JulianIsLost\
 **Date:** 03.09.2025
 
@@ -40,6 +40,7 @@ Before you start, make sure you have:
 
   - **slot:** `int` — The slot index to click.
   - **right_button:** `bool` — Whether to use right-click (defaults to `False`).
+  - **container:** `int` — Whether to perform clicks in a container menu instead of the player inventory
   - **returns:** `bool` — `True` if successful, `False` otherwise.
 
 ---
@@ -50,6 +51,7 @@ Before you start, make sure you have:
 
   - **slot:** `int` — The slot index to drop from.
   - **stack:** `bool` — Drop the whole stack (`True`) or a single item (`False`).
+  - **container:** `int` — Whether to perform clicks in a container menu instead of the player inventory
   - **returns:** `bool` — `True` if successful, `False` otherwise.
 
 ---
@@ -59,6 +61,7 @@ Before you start, make sure you have:
   Performs a shift-click on a slot (moves item between inventories).
 
   - **slot:** `int` — The slot index to shift-click.
+  - **container:** `int` — Whether to perform clicks in a container menu instead of the player inventory
   - **returns:** `bool` — `True` if successful, `False` otherwise.
 
 ---
@@ -69,6 +72,7 @@ Before you start, make sure you have:
 
   - **slot1:** `int` — The first slot index.
   - **slot2:** `int` — The second slot index.
+  - **container:** `int` — Whether to perform clicks in a container menu instead of the player inventory
   - **returns:** `bool` — `True` if successful, `False` otherwise.
 
 ---
@@ -139,21 +143,23 @@ Before you start, make sure you have:
 
 ---
 
-- **merge_stacks(slot1: int, slot2: int) -> bool**
+- **merge_stacks(slot1: int, slot2: int, container: bool = True) -> bool**
 
   Merges two compatible item stacks if possible.
 
   - **slot1:** `int` — The first slot index.
   - **slot2:** `int` — The second slot index.
+  - **container:** `int` — Whether to merge stacks in a container menu instead of the player inventory
   - **returns:** `bool` — `True` if stacks were merged, `False` otherwise.
 
 ---
 
-- **check_for_space(stack_to_insert: ItemStack) -> bool**
+- **check_for_space(item_id: str, count: int) -> bool**
 
   Checks if there is enough space in the inventory for a given item stack.
 
-  - **stack_to_insert:** `ItemStack` — The item stack to insert.
+  - **item_id:** `str` — The to inserted item's id.
+  - **count:** `int` — The to inserted item's count.
   - **returns:** `bool` — `True` if it can fit, `False` otherwise.
 
 ---

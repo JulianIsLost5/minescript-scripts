@@ -7,6 +7,9 @@ ItemStack = JavaClass("net.minecraft.world.item.ItemStack")
 ClickType = JavaClass("net.minecraft.world.inventory.ClickType")
 BlockPos = JavaClass("net.minecraft.core.BlockPos")
 Math = JavaClass("java.lang.Math")
+ItemStack = JavaClass("net.minecraft.world.item.ItemStack")
+Registries = JavaClass("net.minecraft.core.registries.Registries")
+ResourceLocation = JavaClass("net.minecraft.resources.ResourceLocation")
 
 mc = Minecraft.getInstance()
 
@@ -169,25 +172,41 @@ def is_inventory_full() -> bool:
             return False
     return True
     
-def merge_stacks(slot1: int, slot2: int) -> bool:
-    screen = mc.screen
-    if screen is None:
-        return False
-    container_menu = screen.getMenu()
-    inv = container_menu.getContainer()
+def merge_stacks(slot1: int, slot2: int, container: bool = True) -> bool:
+    if not container:
+        inv = mc.player.getInventory()
+        container_id = mc.player.containerMenu.containerId     
+    else:
+        screen = mc.screen
+        if screen is None:
+            return False
+        container_menu = screen.getMenu()
+        inv = container_menu.getContainer()
+        container_id = container_menu.containerId
     
     stack1 = inv.getItem(slot1)
     stack2 = inv.getItem(slot2)
     
     if ItemStack.isSameItem(stack1, stack2) and stack1.getMaxStackSize() >= stack1.getCount() + stack2.getCount():
         mouse_button = 0
-        mc.gameMode.handleInventoryMouseClick(container_menu.containerId, slot1, mouse_button, ClickType.PICKUP, mc.player)
-        mc.gameMode.handleInventoryMouseClick(container_menu.containerId, slot2, mouse_button, ClickType.PICKUP, mc.player)
+        mc.gameMode.handleInventoryMouseClick(container_id, slot1, mouse_button, ClickType.PICKUP, mc.player)
+        mc.gameMode.handleInventoryMouseClick(container_id, slot2, mouse_button, ClickType.PICKUP, mc.player)
         return True
         
     return False
 
-def check_for_space(stack_to_insert: ItemStack) -> bool:
+def check_for_space(item_id: str, count: int) -> bool:
+    def _get_registry_from_key(key):
+        registry_access = mc.level.registryAccess()
+        registry = registry_access.lookupOrThrow(key)
+        return registry
+   
+    def _get_item_registry_entry(item_id):
+        item_registry = _get_registry_from_key(Registries.ITEM)
+        return item_registry.getValue(ResourceLocation.parse(item_id))
+    
+    stack_to_insert = ItemStack(_get_item_registry_entry(item_id), count)
+    
     player = mc.player
     inv = player.getInventory()
 
