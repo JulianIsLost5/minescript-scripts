@@ -16,6 +16,8 @@ ResourceLocation = JavaClass("net.minecraft.resources.ResourceLocation") # type:
 AABB = JavaClass("net.minecraft.world.phys.AABB") # type: ignore
 ARGB = JavaClass("net.minecraft.util.ARGB") # type: ignore
 DebugRenderer = JavaClass("net.minecraft.client.renderer.debug.DebugRenderer") # type: ignore
+Component = JavaClass("net.minecraft.network.chat.Component") # type: ignore
+ChatFormatting = JavaClass("net.minecraft.ChatFormatting") # type: ignore
 
 Vec3 = JavaClass("net.minecraft.world.phys.Vec3") # type: ignore
 
