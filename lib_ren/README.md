@@ -138,6 +138,32 @@ Classes for rendering in the world
   WorldRendering.particle(ParticleTypes.HEART, (10, -60, 4))
   ```
 
+###  HudRendering
+
+Classes for rendering in the world
+
+- **text(context: DrawContext, text: str, position: tuple(int, int), rgba: tuple(int, int, int, int), shadow:bool = False, obfsucated:bool = False, strikethrough:bool = False, underline:bool = False, italic:bool = False)**
+
+  Renders a text on the hud
+
+  ```python
+  from lib_ren import HudRendering
+
+  HudRenderCallback = JavaClass("net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback")
+  
+  def on_press_key(event):
+      if event.action == 0 and event.key == 342:  # ALT
+          callback.cancel()
+          execute("\killjob 1")
+
+  def render(context, tick):
+      HudRendering.text(context, "Hello World", (10, 10), (0, 0, 0, 255), obfsucated=True)
+  
+  add_event_listener("key", on_press_key)
+  callback = ManagedCallback(render)
+  HudRenderCallback.EVENT.register(HudRenderCallback(callback))
+  ```
+
 ## Useful Links
 
 - [Minecraft Internal Mappings](https://mappings.dev) 
