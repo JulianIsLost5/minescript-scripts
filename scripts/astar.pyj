@@ -1,3 +1,5 @@
+# requires change of box = AABB(*bounds) to box = AABB(bounds) in lib_rens wireframe
+
 from lib_ren import WorldRendering
 
 WorldRenderEvents = JavaClass("net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents") # type: ignore
