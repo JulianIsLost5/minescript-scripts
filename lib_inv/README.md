@@ -1,6 +1,6 @@
 # Lib_Inv
 
-**Version:** 1.1.1\
+**Version:** 1.2.0\
 **Author:** JulianIsLost\
 **Date:** 03.09.2025
 
@@ -151,6 +151,15 @@ Before you start, make sure you have:
   - **slot2:** `int` — The second slot index.
   - **container:** `int` — Whether to merge stacks in a container menu instead of the player inventory
   - **returns:** `bool` — `True` if stacks were merged, `False` otherwise.
+
+---
+
+- **compact_inventory(container: bool = True) -> bool**
+
+  Compacts the inventory.
+
+  - **container:** `int` — Whether to compact in a container menu instead of the player inventory
+  - **returns:** `bool` — `True` when done.
 
 ---
 

@@ -195,6 +195,46 @@ def merge_stacks(slot1: int, slot2: int, container: bool = True) -> bool:
         
     return False
 
+def compact_inventory(container: bool = True) -> bool:
+    if not container:
+        inv = mc.player.getInventory()
+        container_id = mc.player.containerMenu.containerId     
+    else:
+        screen = mc.screen
+        if screen is None:
+            return False
+        container_menu = screen.getMenu()
+        inv = container_menu.getContainer()
+        container_id = container_menu.containerId
+        
+    size = inv.getContainerSize()
+        
+    for main_index in range(size):
+        main_stack = inv.getItem(main_index)
+        if main_stack.isEmpty():
+            continue
+        
+        for other_index in range(main_index + 1, size):
+            other_stack = inv.getItem(other_index)
+            if other_stack.isEmpty():
+                continue
+            elif not ItemStack.isSameItem(main_stack, other_stack):
+                continue
+            
+            combined = main_stack.getCount() + other_stack.getCount()
+            max_size = main_stack.getMaxStackSize()
+            
+            if main_stack.getCount() < max_size:
+                mc.gameMode.handleInventoryMouseClick(container_id, other_index, 0, ClickType.PICKUP, mc.player)
+                mc.gameMode.handleInventoryMouseClick(container_id, main_index, 0, ClickType.PICKUP, mc.player)
+                
+                if combined > max_size:
+                    mc.gameMode.handleInventoryMouseClick(container_id, other_index, 0, ClickType.PICKUP, mc.player)
+                    
+                main_stack = inv.getItem(main_index)
+        
+    return True
+
 def check_for_space(item_id: str, count: int) -> bool:
     def _get_registry_from_key(key):
         registry_access = mc.level.registryAccess()
