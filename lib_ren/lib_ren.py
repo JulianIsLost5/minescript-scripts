@@ -114,7 +114,7 @@ class WorldRendering():
         multiBufferSource = context.consumers()
         vertexConsumer = multiBufferSource.getBuffer(RenderType.lines())
         
-        position = camera.position()
+        position = camera.getPosition()
     
         poseStack.pushPose()
         poseStack.translate(-position.x, -position.y, -position.z)
@@ -171,7 +171,7 @@ class WorldRendering():
         poseStack = context.matrixStack()
         multiBufferSource = context.consumers()
     
-        cameraPos = camera.position()
+        cameraPos = camera.getPosition()
         
         poseStack.pushPose()
         poseStack.translate(
