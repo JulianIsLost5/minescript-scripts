@@ -11,6 +11,7 @@ Math = JavaClass("java.lang.Math")
 ItemStack = JavaClass("net.minecraft.world.item.ItemStack")
 Registries = JavaClass("net.minecraft.core.registries.Registries")
 ResourceLocation = JavaClass("net.minecraft.resources.ResourceLocation")
+ButtonClickC2SPacket = JavaClass("net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket")
 
 mc = Minecraft.getInstance()
 
@@ -81,88 +82,124 @@ def inventory_hotbar_swap(inv_slot: int, hotbar_slot: int) -> bool:
     
     return True
 
-def is_slot_empty(slot: int) -> bool:
+def click_ui_button(button_index: int) -> bool:
     screen = mc.screen
     if screen is None:
         return False
-    container_menu = screen.getMenu()
     
-    if container_menu.getSlot(slot).getItem().isEmpty():
-        return True
+    container_menu = screen.getMenu()
+    container_id = container_menu.containerId
+
+    packet = ButtonClickC2SPacket(container_id, button_index)
+    cpl = mc.player.connection
+
+    cpl.send(packet)
+    return True
+
+def is_slot_empty(slot: int, container: bool = False) -> bool:
+    if container:
+        screen = mc.screen
+        if screen is None:
+            return False
+        container_menu = screen.getMenu()
+    
+        if container_menu.getItems().get(slot).isEmpty():
+            return True
+    else: 
+        player = mc.player
+        inv = player.getInventory()
+        if inv.getItem(slot).isEmpty():
+            return True
         
     return False
 
 def get_item_at_slot(slot: int, container: bool = False):
-    if not container:
-        player = mc.player
-        inv = player.getInventory()
-        slot_stack = inv.getItem(slot)
-    else: 
+    if container:
         screen = mc.screen
         if screen is None:
             return None
         container_menu = screen.getMenu()
-        slot_stack = container_menu.getSlot(slot).getItem()
-    
-    return slot_stack
+        slot_stack = container_menu.getItems().get(slot)
+    else: 
+        player = mc.player
+        inv = player.getInventory()
+        slot_stack = inv.getItem(slot)
+        
+    return slot_stack      
     
 def get_empty_slots(container: bool = False):
     empty_slots = []
     
-    if not container:
-        player = mc.player
-        inv = player.getInventory()      
-    else:
+    if container:
         screen = mc.screen
         if screen is None:
             return None
         container_menu = screen.getMenu()
-        inv = container_menu.getContainer()
-    
-    for i in range(inv.getContainerSize()):
-            slot_stack = inv.getItem(i)
+        inv = container_menu.getItems()
+        
+        for index in range(inv.size()):
+            slot_stack = inv.get(index)
             if slot_stack.isEmpty():
-                empty_slots.append(i)        
+                empty_slots.append(index)
+    else:
+        player = mc.player
+        inv = player.getInventory() 
+        
+        for index in range(inv.getContainerSize()):
+            slot_stack = inv.getItem(index)
+            if slot_stack.isEmpty():
+                empty_slots.append(index)        
             
     return empty_slots
 
 def find_item(item_id: str, container: bool = False):
-    if not container:
-        player = mc.player
-        inv = player.getInventory()
-    else: 
+    if container:
         screen = mc.screen
         if screen is None:
             return None
         container_menu = screen.getMenu()
-        inv = container_menu.getContainer()
+        inv = container_menu.getItems()
         
-    for i in range(inv.getContainerSize()):
-        slot_stack = inv.getItem(i)
-        if str(slot_stack.getItem()) == item_id:
-            return i
+        for index in range(inv.size()):
+            slot_stack = inv.get(index)
+            if str(slot_stack.getItem()) == item_id:
+                return index
+    else:
+        player = mc.player
+        inv = player.getInventory()
+    
+        for index in range(inv.getContainerSize()):
+            slot_stack = inv.getItem(index)
+            if str(slot_stack.getItem()) == item_id:
+                return index
         
     return None
     
 def count_item(item_id: str, container: bool = False) -> int:
-    if not container:
-        player = mc.player
-        inv = player.getInventory()
-    else:
+    count = 0
+    
+    if container:
         screen = mc.screen
         if screen is None:
             return None
         container_menu = screen.getMenu()
-        inv = container_menu.getContainer()
-        
-    count = 0
-    
-    for i in range(inv.getContainerSize()):
-        slot_stack = inv.getItem(i)
-        if str(slot_stack.getItem()) == item_id:
-            count += slot_stack.getCount()
+        inv = container_menu.getItems()
+
+        for index in range(inv.size()):
+            slot_stack = inv.get(index)
+            if str(slot_stack.getItem()) == item_id:
+                count += slot_stack.getCount()
+    else:
+        player = mc.player
+        inv = player.getInventory()
+
+        for index in range(inv.getContainerSize()):
+            slot_stack = inv.getItem(index)
+            if str(slot_stack.getItem()) == item_id:
+                count += slot_stack.getCount()
+                
     return count
-    
+
 def is_inventory_full() -> bool:
     player = mc.player
     inv = player.getInventory()
@@ -174,24 +211,27 @@ def is_inventory_full() -> bool:
     return True
     
 def merge_stacks(slot1: int, slot2: int, container: bool = True) -> bool:
-    if not container:
-        inv = mc.player.getInventory()
-        container_id = mc.player.containerMenu.containerId     
-    else:
+    if container:
         screen = mc.screen
         if screen is None:
-            return False
+            return None
         container_menu = screen.getMenu()
-        inv = container_menu.getContainer()
+        inv = container_menu.getItems()
         container_id = container_menu.containerId
-    
-    stack1 = inv.getItem(slot1)
-    stack2 = inv.getItem(slot2)
+        
+        stack1 = inv.get(slot1)
+        stack2 = inv.get(slot2)
+    else:   
+        inv = mc.player.getInventory()
+        container_id = mc.player.containerMenu.containerId 
+        
+        stack1 = inv.getItem(slot1)
+        stack2 = inv.getItem(slot2)
     
     if ItemStack.isSameItem(stack1, stack2) and stack1.getMaxStackSize() >= stack1.getCount() + stack2.getCount():
         mouse_button = 0
-        mc.gameMode.handleInventoryMouseClick(container_id, slot1, mouse_button, ClickType.PICKUP, mc.player)
         mc.gameMode.handleInventoryMouseClick(container_id, slot2, mouse_button, ClickType.PICKUP, mc.player)
+        mc.gameMode.handleInventoryMouseClick(container_id, slot1, mouse_button, ClickType.PICKUP, mc.player)
         return True
         
     return False

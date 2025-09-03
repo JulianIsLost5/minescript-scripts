@@ -1,6 +1,6 @@
 # Lib_Inv
 
-**Version:** 1.2.1\
+**Version:** 1.3.0\
 **Author:** JulianIsLost\
 **Date:** 03.09.2025
 
@@ -87,11 +87,21 @@ Before you start, make sure you have:
 
 ---
 
-- **is_slot_empty(slot: int) -> bool**
+- **click_ui_button(button_index: int) -> bool**
+
+  Clicks a button in an open ui.
+
+  - **slot:** `int` — The slot index to check.
+  - **returns:** `bool` — `True` if succesful, `False` if there is no ui open.
+
+---
+
+- **is_slot_empty(slot: int, container: bool = False) -> bool**
 
   Checks if a slot is empty.
 
   - **slot:** `int` — The slot index to check.
+  - **container:** `bool` — Whether to check the container menu instead of the player inventory.
   - **returns:** `bool` — `True` if empty, `False` otherwise.
 
 ---
