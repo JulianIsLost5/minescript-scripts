@@ -1,4 +1,5 @@
 from java import *
+from collections import defaultdict
 import minescript as m
 m.set_default_executor(m.script_loop)
 
@@ -196,6 +197,12 @@ def merge_stacks(slot1: int, slot2: int, container: bool = True) -> bool:
     return False
 
 def compact_inventory(container: bool = True) -> bool:
+    def _buid_key(stack):
+        item_type = str(stack.getItem())
+        component = stack.getComponents()
+        component_str = str(component)
+        return (item_type, component_str)
+    
     if not container:
         inv = mc.player.getInventory()
         container_id = mc.player.containerMenu.containerId     
@@ -207,31 +214,39 @@ def compact_inventory(container: bool = True) -> bool:
         inv = container_menu.getContainer()
         container_id = container_menu.containerId
         
-    size = inv.getContainerSize()
+    grouped = defaultdict(list)
         
-    for main_index in range(size):
-        main_stack = inv.getItem(main_index)
-        if main_stack.isEmpty():
+    for slot_index in range(inv.getContainerSize()):
+        stack = inv.getItem(slot_index)
+        if stack.isEmpty():
             continue
         
-        for other_index in range(main_index + 1, size):
+        key = _buid_key(stack)
+        
+        grouped[key].append(slot_index)
+        
+    for key in grouped: 
+        if len(grouped[key]) <= 1:
+            continue
+        
+        for slot_index in grouped[key]:
+            if not inv.getItem(slot_index).isEmpty():
+                main_index = slot_index
+                break
+            
+        for other_index in grouped[key]:
+            if other_index == main_index:
+                continue
             other_stack = inv.getItem(other_index)
             if other_stack.isEmpty():
                 continue
-            elif not ItemStack.isSameItem(main_stack, other_stack):
-                continue
             
-            combined = main_stack.getCount() + other_stack.getCount()
-            max_size = main_stack.getMaxStackSize()
+            mc.gameMode.handleInventoryMouseClick(container_id, other_index, 0, ClickType.PICKUP, mc.player)
+            mc.gameMode.handleInventoryMouseClick(container_id, main_index, 0, ClickType.PICKUP, mc.player)
             
-            if main_stack.getCount() < max_size:
+            leftover = inv.getItem(other_index)
+            if not leftover.isEmpty():
                 mc.gameMode.handleInventoryMouseClick(container_id, other_index, 0, ClickType.PICKUP, mc.player)
-                mc.gameMode.handleInventoryMouseClick(container_id, main_index, 0, ClickType.PICKUP, mc.player)
-                
-                if combined > max_size:
-                    mc.gameMode.handleInventoryMouseClick(container_id, other_index, 0, ClickType.PICKUP, mc.player)
-                    
-                main_stack = inv.getItem(main_index)
         
     return True
 
