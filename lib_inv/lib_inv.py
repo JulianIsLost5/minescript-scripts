@@ -12,6 +12,7 @@ ItemStack = JavaClass("net.minecraft.world.item.ItemStack")
 Registries = JavaClass("net.minecraft.core.registries.Registries")
 ResourceLocation = JavaClass("net.minecraft.resources.ResourceLocation")
 ButtonClickC2SPacket = JavaClass("net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket")
+Float = JavaClass("java.lang.Float")
 
 mc = Minecraft.getInstance()
 
@@ -334,7 +335,8 @@ def select_best_tool(position) -> bool:
         slot_stack = inv.getItem(index)
         slot_item = slot_stack.getItem()
         speed = slot_item.getDestroySpeed(slot_stack, state)
-        if speed > best_speed and slot_item.isCorrectToolForDrops(slot_stack, state):
+
+        if Float.compare(speed, best_speed) > 0 and slot_item.isCorrectToolForDrops(slot_stack, state):
             best_speed = speed
             best_index = index
     
