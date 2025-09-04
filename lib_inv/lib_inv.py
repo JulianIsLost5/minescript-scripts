@@ -529,7 +529,7 @@ def check_for_space(item_id: str, count: int) -> bool:
             
     return False
 
-def select_best_tool(position: tuple(int, int, int)) -> bool:
+def select_best_tool(position: list[int, int, int]) -> bool:
     """
     Select the best tool for breaking a block at the given position.
     
