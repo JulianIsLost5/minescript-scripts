@@ -1,6 +1,6 @@
 # Lib_Inv
 
-**Version:** 1.3.1\
+**Version:** 1.4.0\
 **Author:** JulianIsLost\
 **Date:** 03.09.2025
 
@@ -84,6 +84,25 @@ Before you start, make sure you have:
   - **inv_slot:** `int` — The slot to swap to the hotbar.
   - **hotbar_slot:** `int` — The slot to swap to the inventory.
   - **returns:** `bool` — `True` if done.
+
+---
+
+- **create_recipe_lookup() -> HashMap**
+
+  Creates a lookup for crafting recipes. Must be newly created each session.
+
+  - **returns:** `HashMap` — Map that is used by the `craft()` method.
+
+---
+
+- **craft(item_id: str, lookup, craft_all: bool = False) -> bool**
+
+  Performs a crafting operation using the crafting book's recipes.
+
+  - **item_id:** `str` — The item ID of the crafting result.
+  - **lookup:** `HashMap` — Lookup returned by `create_recipe_lookup()`.
+  - **craft_all:** `int` — Whether to shift click a recipe.
+  - **returns:** `bool` — `True` if succesful, `False` if there is no crafting ui open.
 
 ---
 

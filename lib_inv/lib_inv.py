@@ -11,8 +11,18 @@ Math = JavaClass("java.lang.Math")
 ItemStack = JavaClass("net.minecraft.world.item.ItemStack")
 Registries = JavaClass("net.minecraft.core.registries.Registries")
 ResourceLocation = JavaClass("net.minecraft.resources.ResourceLocation")
-ButtonClickC2SPacket = JavaClass("net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket")
 Float = JavaClass("java.lang.Float")
+Array = JavaClass("java.lang.reflect.Array")
+Clazz = JavaClass("java.lang.Class")
+HashMap = JavaClass("java.util.HashMap")
+
+def _get_private_field_value(obj, intermediary):
+    cls = obj.getClass()
+    
+    field = cls.getDeclaredField(intermediary)
+    field.setAccessible(True)
+    
+    return field.get(obj)
 
 mc = Minecraft.getInstance()
 
@@ -91,10 +101,55 @@ def click_ui_button(button_index: int) -> bool:
     container_menu = screen.getMenu()
     container_id = container_menu.containerId
 
-    packet = ButtonClickC2SPacket(container_id, button_index)
-    cpl = mc.player.connection
+    mc.gameMode.handleInventoryButtonClick(container_id, button_index)
+    return True
 
-    cpl.send(packet)
+def create_recipe_lookup():
+    book = mc.player.getRecipeBook()
+    recipes = _get_private_field_value(book, "field_54810")
+        
+    lookup = HashMap()
+        
+    it = recipes.entrySet().iterator()
+    while it.hasNext():
+        entry = it.next()
+        value = entry.getValue().display().result().stack().getItem()
+        
+        lookup.put(str(value), entry.getKey())
+        
+    return lookup
+
+def craft(item_id: str, lookup, craft_all: bool = False) -> bool:
+    book = mc.player.getRecipeBook()
+
+    screen = mc.screen 
+    if screen is None:
+        return False
+    container_menu = screen.getMenu()
+    book_type = container_menu.getRecipeBookType()
+    if not book.isOpen(book_type):
+        book.setOpen(book_type, True)
+    
+        if screen:
+            param_types = Array.newInstance(Clazz, 0)
+        
+            cls = screen.getClass()
+            while cls is not None:
+                try:
+                    method = cls.getDeclaredMethod("method_48640", param_types)
+                    break
+                except:
+                    cls = cls.getSuperclass()
+            
+            method.setAccessible(True)
+            method.invoke(screen, param_types)
+    # ---------------------------------------- 
+    display_id= lookup.get(item_id)
+    container_id = container_menu.containerId
+    
+    mc.gameMode.handlePlaceRecipe(container_id, display_id, craft_all)
+    mc.gameMode.handleInventoryMouseClick(container_id, 0, 0, ClickType.QUICK_MOVE, mc.player)
+    
     return True
 
 def is_slot_empty(slot: int, container: bool = False) -> bool:
