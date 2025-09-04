@@ -27,6 +27,16 @@ def _get_private_field_value(obj, intermediary):
 mc = Minecraft.getInstance()
 
 def click_slot(slot: int, right_button: bool = False, container: bool = True) -> bool:
+    """
+    Click a slot in the inventory.
+
+    Args:
+        slot: Slot index to click.
+        right_button: Whether to use right-click (default: False).
+        container: Whether to target an open container menu (default: True).
+    Returns:
+        True if successful, False otherwise.
+    """
     if not container:
         container_id = mc.player.containerMenu.containerId     
     else:
@@ -42,6 +52,16 @@ def click_slot(slot: int, right_button: bool = False, container: bool = True) ->
     return True
     
 def drop_slot(slot: int, stack: bool = False, container: bool = True) -> bool:
+    """
+    Drop items from a slot.
+
+    Args:
+        slot: Slot index.
+        stack: If True, drop the entire stack (default: False).
+        container: Whether to use a container menu (default: True).
+    Returns:
+        True if successful, False otherwise.
+    """
     if not container:
         container_id = mc.player.containerMenu.containerId     
     else:
@@ -57,6 +77,15 @@ def drop_slot(slot: int, stack: bool = False, container: bool = True) -> bool:
     return True
 
 def shift_click_slot(slot: int, container: bool = True) -> bool:
+    """
+    Shift-click an inventory slot (quick move).
+    
+    Args:
+        slot: Slot index.
+        container: Whether to use a container menu (default: True).
+    Returns:
+        True if successful, False otherwise.
+    """
     if not container:
         container_id = mc.player.containerMenu.containerId     
     else:
@@ -72,6 +101,16 @@ def shift_click_slot(slot: int, container: bool = True) -> bool:
     return True
 
 def swap_slots(slot1: int, slot2: int, container: bool = True) -> bool:
+    """
+    Swap the contents of two inventory slots.
+    
+    Args:
+        slot1: First slot index.
+        slot2: Second slot index.
+        container: Whether to use a container menu (default: True).
+    Returns:
+        True if successful, False otherwise.
+    """
     if not container:
         container_id = mc.player.containerMenu.containerId     
     else:
@@ -89,11 +128,28 @@ def swap_slots(slot1: int, slot2: int, container: bool = True) -> bool:
     return True
 
 def inventory_hotbar_swap(inv_slot: int, hotbar_slot: int) -> bool:
+    """
+    Swap an inventory slot with a hotbar slot.
+    
+    Args:
+        inv_slot: Inventory slot index.
+        hotbar_slot: Hotbar slot index.
+    Returns:
+        True if successful, False otherwise.
+    """
     mc.gameMode.handleInventoryMouseClick(mc.player.containerMenu.containerId, inv_slot, hotbar_slot, ClickType.SWAP, mc.player)
     
     return True
 
 def click_ui_button(button_index: int) -> bool:
+    """
+    Click a button in the current UI screen.
+    
+    Args:
+        button_index: Button index.
+    Returns:
+        True if successful, False otherwise.
+    """
     screen = mc.screen
     if screen is None:
         return False
@@ -105,7 +161,15 @@ def click_ui_button(button_index: int) -> bool:
     return True
 
 def create_recipe_lookup():
+    """
+    Create a lookup map of craftable recipes from the recipe book.
+    
+    Returns:
+        Lookup map or None if faulty.
+    """
     book = mc.player.getRecipeBook()
+    if not book:
+        return None
     recipes = _get_private_field_value(book, "field_54810")
         
     lookup = HashMap()
@@ -120,6 +184,16 @@ def create_recipe_lookup():
     return lookup
 
 def craft(item_id: str, lookup, craft_all: bool = False) -> bool:
+    """
+    Craft an item using the recipe book.
+
+    Args:
+        item_id: String identifier of the item.
+        lookup: Recipe lookup map from create_recipe_lookup().
+        craft_all: If True, craft as many as possible (default: False).
+    Returns:
+        True if crafting was performed, False otherwise.
+    """
     book = mc.player.getRecipeBook()
 
     screen = mc.screen 
@@ -153,6 +227,15 @@ def craft(item_id: str, lookup, craft_all: bool = False) -> bool:
     return True
 
 def is_slot_empty(slot: int, container: bool = False) -> bool:
+    """
+    Check whether a slot is empty.
+    
+    Args:
+        slot: To be checked slot
+        container: Whether to use a container menu (default: False).
+    Returns:
+        True if empty, False otherwise.
+    """
     if container:
         screen = mc.screen
         if screen is None:
@@ -170,6 +253,15 @@ def is_slot_empty(slot: int, container: bool = False) -> bool:
     return False
 
 def get_item_at_slot(slot: int, container: bool = False):
+    """
+    Get the ItemStack at a given slot.
+    
+    Args:
+        slot: To be retrieved slot
+        container: Whether to use a container menu (default: False).
+    Returns:
+        None if empty, ItemStack otherwise
+    """
     if container:
         screen = mc.screen
         if screen is None:
@@ -184,6 +276,14 @@ def get_item_at_slot(slot: int, container: bool = False):
     return slot_stack      
     
 def get_empty_slots(container: bool = False):
+    """
+    Return a list of indices for all empty slots.
+    
+    Args:
+        container: Whether to use a container menu (default: False).
+    Returns:
+        List of empry slot indices.
+    """
     empty_slots = []
     
     if container:
@@ -209,6 +309,15 @@ def get_empty_slots(container: bool = False):
     return empty_slots
 
 def find_item(item_id: str, container: bool = False):
+    """
+    Find the first slot containing a specific item.
+    
+    Args:
+        item_id: String identifier of the item.
+        container: Whether to use a container menu (default: False).
+    Returns:
+        Index if found, otherwise None.
+    """
     if container:
         screen = mc.screen
         if screen is None:
@@ -232,6 +341,15 @@ def find_item(item_id: str, container: bool = False):
     return None
     
 def count_item(item_id: str, container: bool = False) -> int:
+    """
+    Count the total number of a given item in inventory or container.
+    
+    Args:
+        item_id: String identifier of the item.
+        container: Whether to use a container menu (default: False).
+    Returns:
+        Count of item.
+    """
     count = 0
     
     if container:
@@ -257,6 +375,12 @@ def count_item(item_id: str, container: bool = False) -> int:
     return count
 
 def is_inventory_full() -> bool:
+    """
+    Check whether the player's inventory is completely full.
+    
+    Returns:
+        True if it is full, False otherwise
+    """
     player = mc.player
     inv = player.getInventory()
     
@@ -267,6 +391,16 @@ def is_inventory_full() -> bool:
     return True
     
 def merge_stacks(slot1: int, slot2: int, container: bool = True) -> bool:
+    """
+    Try to merge two stacks if they are the same item type.
+    
+    Args:
+        slot1: First slot index.
+        slot2: Second slot index.
+        container: Whether to use a container menu (default: True).
+    Returns:
+        True if successful, False otherwise.
+    """
     if container:
         screen = mc.screen
         if screen is None:
@@ -293,6 +427,14 @@ def merge_stacks(slot1: int, slot2: int, container: bool = True) -> bool:
     return False
 
 def compact_inventory(container: bool = True) -> bool:
+    """
+    Compact inventory by merging partial stacks of identical items.
+    
+    Args:
+        container: Whether to use a container menu (default: True).
+    Returns:
+        True if successful, False otherwise.
+    """
     def _buid_key(stack):
         item_type = str(stack.getItem())
         component = stack.getComponents()
@@ -347,6 +489,15 @@ def compact_inventory(container: bool = True) -> bool:
     return True
 
 def check_for_space(item_id: str, count: int) -> bool:
+    """
+    Check if there is enough space in the inventory for a given item stack.
+    
+    Args:
+        item_id: String identifier of the item.
+        count: Amount of items to fit.
+    Returns:
+        True if there is enough space, False otherwise.
+    """
     def _get_registry_from_key(key):
         registry_access = mc.level.registryAccess()
         registry = registry_access.lookupOrThrow(key)
@@ -378,7 +529,15 @@ def check_for_space(item_id: str, count: int) -> bool:
             
     return False
 
-def select_best_tool(position) -> bool:
+def select_best_tool(position: tuple(int, int, int)) -> bool:
+    """
+    Select the best tool for breaking a block at the given position.
+    
+    Args:
+        position: Position of the block
+    Returns:
+        True if there is successful, False otherwise.
+    """
     position = BlockPos(*position)
     state = mc.level.getBlockState(position)
     inv = mc.player.getInventory()

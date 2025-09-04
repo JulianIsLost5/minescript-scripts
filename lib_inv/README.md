@@ -1,6 +1,6 @@
 # Lib_Inv
 
-**Version:** 1.4.0\
+**Version:** 1.4.1\
 **Author:** JulianIsLost\
 **Date:** 03.09.2025
 
