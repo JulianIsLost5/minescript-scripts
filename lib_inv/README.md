@@ -1,12 +1,13 @@
 # Lib_Inv
 
-**Version:** 1.4.2\
+**Version:** 1.5.0\
 **Author:** JulianIsLost\
 **Date:** 03.09.2025
 
 User-friendly API for performing invenotry operations in Minecraft.  
 This module should be imported by other scripts and not run directly.
 
+Big thanks to [maxuser](https://github.com/maxuser0) for creating the mod and [razrcraft](https://github.com/R4z0rX) for bringing light into the darkness of minescript coding
 ---
 
 ## Prerequisites
@@ -40,9 +41,9 @@ Before you start, make sure you have:
 
   - **slot:** `int` — The slot index to click.
   - **right_button:** `bool` — Whether to use right-click (defaults to `False`).
-  - **container:** `int` — Whether to perform clicks in a container menu instead of the player inventory
+  - **container:** `bool` — Whether to perform clicks in a container menu instead of the player inventory
   - **returns:** `bool` — `True` if successful, `False` otherwise.
-
+  <sub>Extended on Minescript Plus</sub>
 ---
 
 - **drop_slot(slot: int, stack: bool = False, container: bool = True) -> bool**
@@ -51,7 +52,7 @@ Before you start, make sure you have:
 
   - **slot:** `int` — The slot index to drop from.
   - **stack:** `bool` — Drop the whole stack (`True`) or a single item (`False`).
-  - **container:** `int` — Whether to perform clicks in a container menu instead of the player inventory
+  - **container:** `bool` — Whether to perform clicks in a container menu instead of the player inventory
   - **returns:** `bool` — `True` if successful, `False` otherwise.
 
 ---
@@ -61,9 +62,9 @@ Before you start, make sure you have:
   Performs a shift-click on a slot (moves item between inventories).
 
   - **slot:** `int` — The slot index to shift-click.
-  - **container:** `int` — Whether to perform clicks in a container menu instead of the player inventory
+  - **container:** `bool` — Whether to perform clicks in a container menu instead of the player inventory
   - **returns:** `bool` — `True` if successful, `False` otherwise.
-
+  <sub>Extended on Minescript Plus</sub>
 ---
 
 - **swap_slots(slot1: int, slot2: int, container: bool = True) -> bool**
@@ -72,7 +73,7 @@ Before you start, make sure you have:
 
   - **slot1:** `int` — The first slot index.
   - **slot2:** `int` — The second slot index.
-  - **container:** `int` — Whether to perform clicks in a container menu instead of the player inventory
+  - **container:** `bool` — Whether to perform clicks in a container menu instead of the player inventory
   - **returns:** `bool` — `True` if successful, `False` otherwise.
 
 ---
@@ -84,7 +85,7 @@ Before you start, make sure you have:
   - **inv_slot:** `int` — The slot to swap to the hotbar.
   - **hotbar_slot:** `int` — The slot to swap to the inventory.
   - **returns:** `bool` — `True` if done.
-
+  <sub>Replicated from Minescript Plus</sub>
 ---
 
 - **create_recipe_lookup() -> HashMap**
@@ -151,7 +152,7 @@ Before you start, make sure you have:
   - **item_id:** `str` — The item ID to search for.
   - **container:** `bool` — Whether to search in the container menu instead of the player inventory.
   - **returns:** `int | None` — The slot index if found, otherwise `None`.
-
+  <sub>Inspired by Minescript Plus</sub>
 ---
 
 - **count_item(item_id: str, container: bool = False) -> int | None**
@@ -161,7 +162,7 @@ Before you start, make sure you have:
   - **item_id:** `str` — The item ID to count.
   - **container:** `bool` — Whether to count in the container menu instead of the player inventory.
   - **returns:** `int | None` — The total count of the item, or `None` if no screen is open.
-
+  <sub>Extended on Minescript Plus</sub>
 ---
 
 - **is_inventory_full() -> bool**
@@ -178,17 +179,27 @@ Before you start, make sure you have:
 
   - **slot1:** `int` — The first slot index.
   - **slot2:** `int` — The second slot index.
-  - **container:** `int` — Whether to merge stacks in a container menu instead of the player inventory
+  - **container:** `bool` — Whether to merge stacks in a container menu instead of the player inventory
   - **returns:** `bool` — `True` if stacks were merged, `False` otherwise.
 
 ---
 
 - **compact_inventory(container: bool = True) -> bool**
 
-  Compacts the inventory.
+  Compact inventory by merging partial stacks of identical items.
 
-  - **container:** `int` — Whether to compact in a container menu instead of the player inventory
+  - **container:** `bool` — Whether to compact a container menu instead of the player inventory
   - **returns:** `bool` — `True` when done.
+
+---
+
+- **sort_inventory(container: bool = False) -> bool**
+
+  Sort inventory by merging partial stacks and then sorting by tag and aplhabet.
+
+  - **container:** `bool` — Whether to sort a container menu instead of the player inventory
+  - **returns:** `bool` — `True` when done.
+  <sub>Special thanks to razrcraft for brainstorming an approach with me</sub>
 
 ---
 
@@ -214,6 +225,7 @@ Before you start, make sure you have:
 
 - [Minecraft Internal Mappings](https://mappings.dev) 
 - [Minescript Discord](https://discord.gg/NjcyvrHTze)
+- [Minescript Plus](https://github.com/R4z0rX/minescript-scripts/tree/main/Minescript-Plus)
 
 ## License
 

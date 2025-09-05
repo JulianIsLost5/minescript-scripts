@@ -1,5 +1,7 @@
 from java import *
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
+import time
+
 import minescript as m
 m.set_default_executor(m.script_loop)
 
@@ -8,7 +10,6 @@ ItemStack = JavaClass("net.minecraft.world.item.ItemStack")
 ClickType = JavaClass("net.minecraft.world.inventory.ClickType")
 BlockPos = JavaClass("net.minecraft.core.BlockPos")
 Math = JavaClass("java.lang.Math")
-ItemStack = JavaClass("net.minecraft.world.item.ItemStack")
 Registries = JavaClass("net.minecraft.core.registries.Registries")
 ResourceLocation = JavaClass("net.minecraft.resources.ResourceLocation")
 Float = JavaClass("java.lang.Float")
@@ -426,6 +427,184 @@ def merge_stacks(slot1: int, slot2: int, container: bool = True) -> bool:
         
     return False
 
+# internal use only
+class Item():
+    def __init__(self, stack, slot):
+        self.str = str(stack.getItem())
+        self.count = stack.getCount()
+        self.maxCount = stack.getMaxStackSize()
+        self.tag = self._find_relevant_tag(stack)
+        self.slot = slot
+        self._resolve_no_tag(self.tag)
+            
+    def _find_relevant_tag(self, item_stack):
+        tags = item_stack.getTags().toList()
+        for index in range(tags.size()):
+            tag = tags.get(index).location()
+            tag_path = tag.getPath()
+        
+            if "/" not in tag_path and "enchantable" not in tag_path and "_" not in tag_path:
+                return tag_path
+        return None
+    
+    def _resolve_no_tag(self, tag):
+        if not tag and "minecraft:air" not in self.str:
+            self.tag = self.str
+    
+    def move(self, target_slot):
+        if self.count == 0 or self.slot == target_slot:
+            return False
+        if not self.str == target_slot.get_str():
+            mc.gameMode.handleInventoryMouseClick(self.get_id(), self.slot.index, 0, ClickType.PICKUP, mc.player)
+            mc.gameMode.handleInventoryMouseClick(self.get_id(), target_slot.index, 0, ClickType.PICKUP, mc.player)
+            
+            if not target_slot.is_empty():
+                mc.gameMode.handleInventoryMouseClick(self.get_id(), self.slot.index, 0, ClickType.PICKUP, mc.player)
+            
+            self.slot.item, target_slot.item = target_slot.item, self.slot.item
+            
+            self.slot.item.slot = self.slot
+            target_slot.item.slot = target_slot
+        else:
+            mc.gameMode.handleInventoryMouseClick(self.get_id(), self.slot.index, 0, ClickType.PICKUP, mc.player)
+            mc.gameMode.handleInventoryMouseClick(self.get_id(), target_slot.index, 0, ClickType.PICKUP, mc.player)
+            
+            change = Math.min(target_slot.get_max_count() -  target_slot.get_count(), self.count)
+            target_slot.item.count += change
+            self.slot.item.count -= change
+            if self.slot.item.count == 0:
+                self.slot.item.str = "minecraft:air"
+            else:
+                mc.gameMode.handleInventoryMouseClick(self.get_id(), self.slot.index, 0, ClickType.PICKUP, mc.player)
+        return True
+    
+    def find_not_full(self):
+        slots = []
+        for slot in self.slot.inventory.slots:
+            if slot.get_str() == self.str and not slot.item is self and slot.get_count() < slot.get_max_count():
+                slots.append(slot)
+        return slots
+    
+    def find_tag(self):
+        slots = []
+        for slot in self.slot.inventory.slots:
+            if slot.get_tag() == self.tag and not slot.item is self:
+                slots.append(slot)
+                print(slot.item.str)
+        return slots
+    
+    def get_id(self):
+        return self.slot.get_id()
+
+# internal use only
+class Slot():
+    def __init__(self, index, item, inventory):
+        self.index = index
+        self.item = Item(item, self)
+        self.inventory = inventory
+        
+    def is_empty(self):
+        return True if self.item.count == 0 else False
+    
+    def get_tag(self):
+        return self.item.tag
+    
+    def get_str(self):
+        return self.item.str
+    
+    def get_count(self):
+        return self.item.count
+    
+    def get_max_count(self):
+        return self.item.maxCount
+    
+    def get_id(self):
+        return self.inventory.container_id
+
+# internal use only
+class Inventory():
+    def __init__(self, inventory, container_id):
+        try:
+            self.slots = [Slot(slot, inventory.getItem(slot), self) for slot in range(inventory.SELECTION_SIZE, inventory.INVENTORY_SIZE)]
+            self.first_index = inventory.SELECTION_SIZE
+        except:
+            self.slots = [Slot(slot, inventory.getItem(slot), self) for slot in range(inventory.getContainerSize())]
+            self.first_index = 0
+        self.container_id = container_id
+    
+    def get_slot(self, index):
+        for slot in self.slots:
+            if slot.index == index:
+                return slot
+    
+    def get_tags(self):
+        tags = []
+        for slot in self.slots:
+            tag = slot.get_tag()
+            if tag is not None and tag not in tags:
+                tags.append(tag)
+        tags.sort()
+        return tags
+    
+    def get_item_names(self):
+        names = []
+        for slot in self.slots:
+            name = slot.get_str()
+            if name not in names and "minecraft:air" not in name:
+                names.append(name)
+        names.sort()
+        return names
+    
+    def get_names_with_tag(self, tag):
+        names = []
+        for slot in self.slots:
+            name = slot.get_str()
+            if name not in names and "minecraft:air" not in name and tag == slot.get_tag():
+                names.append(name)
+        names.sort()
+        return names
+    
+    def items_with_tag(self, tag):
+        items = []
+        for slot in self.slots:
+            if tag == slot.get_tag():
+                items.append(slot.item)
+        return items
+    
+    def items_with_name(self, name):
+        items = []
+        for slot in self.slots:
+            if name == slot.get_str():
+                items.append(slot.item)
+        return items
+    
+    def compact(self):
+        for name in self.get_item_names():
+            for item in self.items_with_name(name):
+                if item.count < item.maxCount:
+                    for slot in item.find_not_full():
+                        item.move(slot)
+                        if item.count == 0:
+                            break
+
+    def sort(self):
+        self.compact()
+        progress = self.first_index
+        for tag in self.get_tags():
+            for name in self.get_names_with_tag(tag):
+                items_with_name = self.items_with_name(name)
+                for i, item in enumerate(items_with_name):
+                    if item.count == item.maxCount:
+                        item.move(self.get_slot(progress))
+                        progress += 1
+                    else:
+                        target_slot = self.get_slot(progress + len(items_with_name) - 1 - i)
+                        item.move(target_slot)
+                        if target_slot.index == progress:
+                            progress += 1
+        return True
+
+
 def compact_inventory(container: bool = True) -> bool:
     """
     Compact inventory by merging partial stacks of identical items.
@@ -435,15 +614,9 @@ def compact_inventory(container: bool = True) -> bool:
     Returns:
         True if successful, False otherwise.
     """
-    def _buid_key(stack):
-        item_type = str(stack.getItem())
-        component = stack.getComponents()
-        component_str = str(component)
-        return (item_type, component_str)
-    
     if not container:
         inv = mc.player.getInventory()
-        container_id = mc.player.containerMenu.containerId     
+        container_id = mc.player.containerMenu.containerId
     else:
         screen = mc.screen
         if screen is None:
@@ -451,42 +624,32 @@ def compact_inventory(container: bool = True) -> bool:
         container_menu = screen.getMenu()
         inv = container_menu.getContainer()
         container_id = container_menu.containerId
-        
-    grouped = defaultdict(list)
-        
-    for slot_index in range(inv.getContainerSize()):
-        stack = inv.getItem(slot_index)
-        if stack.isEmpty():
-            continue
-        
-        key = _buid_key(stack)
-        
-        grouped[key].append(slot_index)
-        
-    for key in grouped: 
-        if len(grouped[key]) <= 1:
-            continue
-        
-        for slot_index in grouped[key]:
-            if not inv.getItem(slot_index).isEmpty():
-                main_index = slot_index
-                break
-            
-        for other_index in grouped[key]:
-            if other_index == main_index:
-                continue
-            other_stack = inv.getItem(other_index)
-            if other_stack.isEmpty():
-                continue
-            
-            mc.gameMode.handleInventoryMouseClick(container_id, other_index, 0, ClickType.PICKUP, mc.player)
-            mc.gameMode.handleInventoryMouseClick(container_id, main_index, 0, ClickType.PICKUP, mc.player)
-            
-            leftover = inv.getItem(other_index)
-            if not leftover.isEmpty():
-                mc.gameMode.handleInventoryMouseClick(container_id, other_index, 0, ClickType.PICKUP, mc.player)
-        
-    return True
+           
+    inv = Inventory(inv, container_id)
+    return inv.compact()
+
+def sort_inventory(container: bool = False):
+    """
+    Sort inventory by merging partial stacks and then sorting by tag and aplhabet.
+    
+    Args:
+        container: Whether to use a container menu (default: False).
+    Returns:
+        True if successful, False otherwise.
+    """
+    if not container:
+        inv = mc.player.getInventory()
+        container_id = mc.player.containerMenu.containerId
+    else:
+        screen = mc.screen
+        if screen is None:
+            return False
+        container_menu = screen.getMenu()
+        inv = container_menu.getContainer()
+        container_id = container_menu.containerId
+           
+    inv = Inventory(inv, container_id)
+    return inv.sort()
 
 def check_for_space(item_id: str, count: int) -> bool:
     """
@@ -512,7 +675,7 @@ def check_for_space(item_id: str, count: int) -> bool:
     player = mc.player
     inv = player.getInventory()
 
-    for i in range(inv.getContainerSize()):
+    for i in range(inv.INVENTORY_SIZE):
         slot_stack = inv.getItem(i)
         remaining = stack_to_insert.copy()
         
