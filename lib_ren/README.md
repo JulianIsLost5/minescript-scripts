@@ -60,7 +60,7 @@ Classes for rendering in the world
   ```
 
   
-- **wireframe(context: WorldRenderContext, bounds: tuple(float, float, float, float, float, float), rgba: tuple(int, int, int, int))**
+- **wireframe(context: WorldRenderContext, bounds: tuple(float, float, float, float, float, float), rgba: tuple(int, int, int, int), visible_through_blocks: bool = False)**
   
   Renders a wireframe of custom size and color into the world
 

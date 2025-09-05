@@ -18,6 +18,8 @@ ARGB = JavaClass("net.minecraft.util.ARGB") # type: ignore
 DebugRenderer = JavaClass("net.minecraft.client.renderer.debug.DebugRenderer") # type: ignore
 Component = JavaClass("net.minecraft.network.chat.Component") # type: ignore
 ChatFormatting = JavaClass("net.minecraft.ChatFormatting") # type: ignore
+RenderStateShard = JavaClass("net.minecraft.client.renderer.RenderStateShard")
+RenderPipelines = JavaClass("net.minecraft.client.renderer.RenderPipelines")
 
 Vec3 = JavaClass("net.minecraft.world.phys.Vec3") # type: ignore
 
@@ -30,6 +32,17 @@ Obj = JavaClass("java.lang.Object") # type: ignore
 Float = JavaClass("java.lang.Float") # type: ignore
  
 mc = Minecraft.getInstance()
+
+xray_lines = RenderType.create(
+    "xray_lines",
+    256,
+    False,
+    False,
+    RenderPipelines.LINES,
+    RenderType.CompositeState.builder()
+        .setOutputState(RenderStateShard.OUTLINE_TARGET)
+        .createCompositeState(False)
+)
 
 def _get_registry_from_key(key):
         registry_access = mc.level.registryAccess()
@@ -98,7 +111,7 @@ class WorldRendering():
         bufferSource.endBatch(RenderType.solid())
         
     @staticmethod
-    def wireframe(context: WorldRenderContext, bounds: tuple(float, float, float, float, float, float), rgba: tuple(int, int, int, int)):
+    def wireframe(context: WorldRenderContext, bounds: tuple(float, float, float, float, float, float), rgba: tuple(int, int, int, int), visible_through_blocks: bool = False):
         """
         Render a wireframe box in the world.
         
@@ -112,7 +125,10 @@ class WorldRendering():
         camera = context.camera()
         poseStack = context.matrixStack()
         multiBufferSource = context.consumers()
-        vertexConsumer = multiBufferSource.getBuffer(RenderType.lines())
+        if not visible_through_blocks:
+            vertexConsumer = multiBufferSource.getBuffer(RenderType.lines())
+        else:
+            vertexConsumer = multiBufferSource.getBuffer(xray_lines)
         
         position = camera.getPosition()
     
