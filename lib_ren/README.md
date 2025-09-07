@@ -60,9 +60,10 @@ Classes for rendering in the world
   ```
 
   
-- **wireframe(context: WorldRenderContext, bounds: tuple(float, float, float, float, float, float), rgba: tuple(int, int, int, int), visible_through_blocks: bool = False)**
+- **wireframe(context: WorldRenderContext, bounds, rgba: tuple(int, int, int, int), visible_through_blocks: bool = False)**
   
-  Renders a wireframe of custom size and color into the world
+  Renders a wireframe of custom size and color into the world.
+  Bounds can be `BlockPos`, `AABB` or a `tuple/list` with 6 entries.
 
   ```python
   from lib_ren import WorldRendering
@@ -82,9 +83,10 @@ Classes for rendering in the world
   WorldRenderEvents.LAST.register(WorldRenderEventsLast(callback))
   ```
   
-- **line(context: WorldRenderContext, beginning: tuple(float, float, float), end: tuple(float, float, float), rgba: tuple(int, int, int, int))**
+- **line(context: WorldRenderContext, beginning, end, rgba: tuple(int, int, int, int), visible_through_blocks: bool = False)**
   
-  Renders a colored line between to coordinates into the world
+  Renders a colored line between to coordinates into the world.
+  `beginning` and `end` can be `Vec3` or `BlockPos` or a `tuple` with three entries each.
 
   ```python
   from lib_ren import WorldRendering

@@ -20,6 +20,10 @@ Component = JavaClass("net.minecraft.network.chat.Component") # type: ignore
 ChatFormatting = JavaClass("net.minecraft.ChatFormatting") # type: ignore
 RenderStateShard = JavaClass("net.minecraft.client.renderer.RenderStateShard")
 RenderPipelines = JavaClass("net.minecraft.client.renderer.RenderPipelines")
+LineStateShard = JavaClass("net.minecraft.client.renderer.RenderStateShard$LineStateShard")
+BlockPos = JavaClass("net.minecraft.core.BlockPos")
+
+OptionalDouble = JavaClass("java.util.OptionalDouble")
 
 Vec3 = JavaClass("net.minecraft.world.phys.Vec3") # type: ignore
 
@@ -32,17 +36,6 @@ Obj = JavaClass("java.lang.Object") # type: ignore
 Float = JavaClass("java.lang.Float") # type: ignore
  
 mc = Minecraft.getInstance()
-
-xray_lines = RenderType.create(
-    "xray_lines",
-    256,
-    False,
-    False,
-    RenderPipelines.LINES,
-    RenderType.CompositeState.builder()
-        .setOutputState(RenderStateShard.OUTLINE_TARGET)
-        .createCompositeState(False)
-)
 
 def _get_registry_from_key(key):
         registry_access = mc.level.registryAccess()
@@ -111,7 +104,7 @@ class WorldRendering():
         bufferSource.endBatch(RenderType.solid())
         
     @staticmethod
-    def wireframe(context: WorldRenderContext, bounds: tuple(float, float, float, float, float, float), rgba: tuple(int, int, int, int), visible_through_blocks: bool = False):
+    def wireframe(context: WorldRenderContext, box, rgba: tuple(int, int, int, int), visible_through_blocks: bool = False):
         """
         Render a wireframe box in the world.
         
@@ -120,15 +113,28 @@ class WorldRendering():
             bounds: 6-tuple defining the AABB (minX, minY, minZ, maxX, maxY, maxZ).
             rgba: Color in RGBA format (0-255 per channel).
         """
-        box = AABB(*bounds)
+        if box.getClass() == type(AABB):
+            box = box
+        elif box.getClass() == type(BlockPos):
+            box = AABB(box)
+        else:
+            box = AABB(*box)
+        
+        render_state = RenderType.create(
+            "wireframe",
+            256,
+            False,
+            False,
+            RenderPipelines.LINES,
+            RenderType.CompositeState.builder()      
+                .setOutputState(RenderStateShard.OUTLINE_TARGET)
+                .createCompositeState(False)
+        ) if visible_through_blocks else RenderType.lines()
         
         camera = context.camera()
         poseStack = context.matrixStack()
         multiBufferSource = context.consumers()
-        if not visible_through_blocks:
-            vertexConsumer = multiBufferSource.getBuffer(RenderType.lines())
-        else:
-            vertexConsumer = multiBufferSource.getBuffer(xray_lines)
+        vertexConsumer = multiBufferSource.getBuffer(render_state)
         
         position = camera.getPosition()
     
@@ -139,7 +145,7 @@ class WorldRendering():
         poseStack.popPose()
 
     @staticmethod
-    def line(context: WorldRenderContext, beginning: tuple(float, float, float), end: tuple(float, float, float), rgba: tuple(int, int, int, int)):
+    def line(context: WorldRenderContext, beginning, end, rgba: tuple(int, int, int, int), visible_through_blocks: bool = False):
         """
         Draw a line between two points in the world.
         
@@ -149,10 +155,32 @@ class WorldRendering():
             end: 3D coordinates of the end point.
             rgba: Color in RGBA format (0-255 per channel).
         """
+ 
+        if beginning.getClass() == type(Vec3):
+            beginning = (Float(beginning.x), Float(beginning.y), Float(beginning.z))
+        elif beginning.getClass() == type(BlockPos):
+            beginning = (beginning.getX(), beginning.getY(), beginning.getZ())
+            
+        if end.getClass() == type(Vec3):
+            end = (Float(end.x), Float(end.y), Float(end.z))
+        elif end.getClass() == type(BlockPos):
+            end = (end.getX(), end.getY(), end.getZ())
+                
+        render_state = RenderType.create(
+            "wireframe",
+            256,
+            False,
+            False,
+            RenderPipelines.DEBUG_LINE_STRIP,
+            RenderType.CompositeState.builder()      
+                .setOutputState(RenderStateShard.OUTLINE_TARGET)
+                .createCompositeState(False)
+        ) if visible_through_blocks else RenderType.debugLineStrip(10)
+        
         camera = context.camera()
         poseStack = context.matrixStack()
         multiBufferSource = context.consumers()
-        vertexConsumer = multiBufferSource.getBuffer(RenderType.debugLineStrip(10))
+        vertexConsumer = multiBufferSource.getBuffer(render_state)
         
         position = camera.getPosition()
     
