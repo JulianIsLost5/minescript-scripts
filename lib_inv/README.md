@@ -91,6 +91,16 @@ Before you start, make sure you have:
   > Extended on Minescript Plus
 ---
 
+- **click_ui_button(button_index: int) -> bool**
+
+  Clicks a button in an open ui.
+
+  - **slot:** `int` — The slot index to check.
+  - **returns:** `bool` — `True` if succesful, `False` if there is no ui open.
+
+
+---
+
 - **create_recipe_lookup() -> HashMap**
 
   Creates a lookup for crafting recipes. Must be newly created each session.
@@ -107,15 +117,6 @@ Before you start, make sure you have:
   - **lookup:** `HashMap` — Lookup returned by `create_recipe_lookup()`.
   - **craft_all:** `int` — Whether to shift click a recipe.
   - **returns:** `bool` — `True` if succesful, `False` if there is no crafting ui open.
-
----
-
-- **click_ui_button(button_index: int) -> bool**
-
-  Clicks a button in an open ui.
-
-  - **slot:** `int` — The slot index to check.
-  - **returns:** `bool` — `True` if succesful, `False` if there is no ui open.
 
 ---
 
@@ -157,6 +158,7 @@ Before you start, make sure you have:
   - **returns:** `int | None` — The slot index if found, otherwise `None`.
   <br></br>
   > Extended on Minescript Plus
+
 ---
 
 - **count_item(item_id: str, container: bool = False) -> int | None**
@@ -168,6 +170,18 @@ Before you start, make sure you have:
   - **returns:** `int | None` — The total count of the item, or `None` if no screen is open.
   <br></br>
   > Extended on Minescript Plus
+
+---
+
+- **has_item(item_id: str, amount: int = 1, container: bool = False) -> bool:**
+
+  Counts the total number of a specific item and returns if its at least the passed amount.
+
+  - **item_id:** `str` — The item ID to count.
+  - **amound:** `int` — The minimum required amount.
+  - **container:** `bool` — Whether to count in the container menu instead of the player inventory.
+  - **returns:** `True` if there are at least the amount of items, `False` otherwise.
+
 ---
 
 - **is_inventory_full() -> bool**
@@ -227,6 +241,34 @@ Before you start, make sure you have:
   - **position:** `tuple[int, int, int]` — The block position (x, y, z).
   - **returns:** `bool` — `True` if a tool was selected, `False` otherwise.
 
+---
+
+## Event Callbacks
+
+| EVENT_TYPE  | Called if  | Passes |
+|:----------- |:----------- |:------- |
+| ITEM_PICKUP | An item is picked up by the player | ItemStack instance
+
+### `InventoryEvent`
+Event system for registering inventory related callbacks (fabric callbacks as template).
+
+- **EVENT_TYPE.register(callback: Callable) -> Listener**  
+  Registers the callback.   
+  *Returns:* A `Listener` instance, which can be manually unregistered.
+
+**Examples:**
+
+Registering an event manually:
+```python
+from lib_inv import InventoryEvent
+
+def on_pickup(item):
+    print(f"Picked up: {item}")
+
+listener = InventoryEvent.ITEM_PICKUP.register(on_pickup)
+# unregister
+listener.unregister()
+```
 
 ## Useful Links
 

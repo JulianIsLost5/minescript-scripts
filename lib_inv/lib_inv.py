@@ -1,6 +1,7 @@
 from java import *
 from collections import defaultdict, OrderedDict
 import time
+import threading
 
 import minescript as m
 m.set_default_executor(m.script_loop)
@@ -16,6 +17,8 @@ Float = JavaClass("java.lang.Float")
 Array = JavaClass("java.lang.reflect.Array")
 Clazz = JavaClass("java.lang.Class")
 HashMap = JavaClass("java.util.HashMap")
+ItemEntity = JavaClass("net.minecraft.world.entity.item.ItemEntity")
+GameType = JavaClass("net.minecraft.world.level.GameType")
 
 def _get_private_field_value(obj, intermediary):
     cls = obj.getClass()
@@ -375,6 +378,44 @@ def count_item(item_id: str, container: bool = False) -> int:
                 
     return count
 
+def has_item(item_id: str, amount: int = 1, container: bool = False) -> bool:
+    """
+    Check if an inventory or container contains atleast a set amount of an item.
+    
+    Args:
+        item_id: String identifier of the item.
+        amount: The minimum amount of the item.
+        container: Whether to use a container menu (default: False).
+    Returns:
+        Count of item.
+    """
+    count = 0
+    
+    if container:
+        screen = mc.screen
+        if screen is None:
+            return None
+        container_menu = screen.getMenu()
+        inv = container_menu.getItems()
+
+        for index in range(inv.size()):
+            slot_stack = inv.get(index)
+            if str(slot_stack.getItem()) == item_id:
+                count += slot_stack.getCount()
+                if count >= amount:
+                    return True
+    else:
+        player = mc.player
+        inv = player.getInventory()
+
+        for index in range(inv.getContainerSize()):
+            slot_stack = inv.getItem(index)
+            if str(slot_stack.getItem()) == item_id:
+                count += slot_stack.getCount()
+                if count >= amount:
+                    return True
+    return False
+    
 def is_inventory_full() -> bool:
     """
     Check whether the player's inventory is completely full.
@@ -721,3 +762,83 @@ def select_best_tool(position: list[int, int, int]) -> bool:
         inv.pickSlot(best_index)
         return True
     return False
+
+class _Listener():
+    def __init__(self):
+        self.registered = False
+        self.callback = None
+        self.interval = 1/20 # 20 ticks per second
+        
+    def register(self, callback):
+        self.registered = True
+        self.callback = callback
+        self.thread = threading.Thread(target=self._run_loop)
+        self.thread.start()
+        
+        self.thread.join()
+
+        return self
+    
+    def unregister(self):
+        self.registered = False 
+        if self.thread and self.thread.is_alive():
+            self.thread.join(timeout=1)   
+            
+class _ItemPickupListener(_Listener):
+    def __init__(self):
+        self.pickup_map = HashMap()
+        super().__init__()
+        
+    def _can_insert(self, inv, stack_to_insert):
+        for i in range(35):
+            slot_stack = inv.getItem(i)
+            remaining = stack_to_insert.copy()
+        
+            if not slot_stack.isEmpty() and ItemStack.isSameItem(slot_stack, remaining):
+                max_add = Math.min(slot_stack.getMaxStackSize() - slot_stack.getCount(), remaining.getCount())
+                if max_add > 0:
+                    remaining.shrink(max_add)
+            elif slot_stack.isEmpty():
+                max_add = Math.min(inv.getMaxStackSize(), remaining.getCount())
+                remaining.shrink(max_add)
+                
+            if remaining.isEmpty():
+               return True
+            
+        return False
+        
+    def _handle_pickup(self, entity):
+        if not self.pickup_map.containsKey(entity):
+            self.pickup_map.put(entity, entity.getItem().copy())
+            
+        it = self.pickup_map.entrySet().iterator()
+        while it.hasNext():
+            entity = it.next().getKey()
+            if (
+                not mc.player.gameMode() is GameType.SPECTATOR 
+                and mc.player.isAlive() 
+                and self._can_insert(mc.player.getInventory(), entity.getItem())
+                and not entity.hasPickUpDelay()
+                and entity.onGround()
+                ):
+                if entity.isRemoved():
+                    self.callback(self.pickup_map.get(entity))
+                    self.pickup_map.remove(entity)
+        
+    def _run_loop(self):
+        while self.registered:
+            entities = mc.level.entitiesForRendering()
+            try:
+                it = entities.iterator()
+                while it.hasNext():
+                    entity = it.next()
+                    if entity.getClass().isAssignableFrom(ItemEntity):
+                        if entity.getBoundingBox().intersects(mc.player.getBoundingBox().inflate(1)):
+                                self._handle_pickup(entity)            
+            except Exception as e:
+                pass
+                            
+            time.sleep(self.interval)
+
+class InventoryEvent():
+    ITEM_PICKUP = _ItemPickupListener()
