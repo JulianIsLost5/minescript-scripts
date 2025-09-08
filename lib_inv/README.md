@@ -1,6 +1,6 @@
 # Lib_Inv
 
-**Version:** 1.5.1  
+**Version:** 1.6.3
 **Author:** JulianIsLost  
 **Date:** 08.09.2025  
 
