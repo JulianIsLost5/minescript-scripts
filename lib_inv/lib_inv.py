@@ -164,6 +164,102 @@ def click_ui_button(button_index: int) -> bool:
     mc.gameMode.handleInventoryButtonClick(container_id, button_index)
     return True
 
+pyj_embed = eval_pyjinn_script(r"""
+ScreenEvents = JavaClass("net.fabricmc.fabric.api.client.screen.v1.ScreenEvents")
+ScreenEventsAfterRender = JavaClass("net.fabricmc.fabric.api.client.screen.v1.ScreenEvents$AfterRender")
+ClientTickEvents = JavaClass("net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents")
+ClientTickEventsEndTick = JavaClass("net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents$EndTick")
+ARGB = JavaClass("net.minecraft.util.ARGB")
+Minecraft = JavaClass("net.minecraft.client.Minecraft")
+Component = JavaClass("net.minecraft.network.chat.Component")
+
+mc = Minecraft.getInstance()
+screen = None
+render_callback = None
+tick_callback = None
+
+def get_private_field_value(obj, intermediary):
+    cls = obj.getClass()
+    for i in range(10):
+        try:
+            field = cls.getDeclaredField(intermediary)
+            field.setAccessible(True)
+
+            return field.get(obj)
+        except:
+            cls = cls.getSuperclass()
+
+def _get_slots():
+        render_lst = []
+        
+        screen = mc.screen
+        if screen is None:
+            return None 
+        container_menu = screen.getMenu()
+
+        x = (screen.width - get_private_field_value(screen, "field_2792")) // 2
+        y = (screen.height - get_private_field_value(screen, "field_2779")) // 2
+        
+        slots = container_menu.slots
+        
+        for index, slot in enumerate(slots):
+            render_lst.append((str(index), x + slot.x, y + slot.y, ARGB.color(255, 170, 0, 0), False))
+            
+        return render_lst
+
+def after_render(screen, graphics, mouseX, mouseY, tick):
+    render_lst = _get_slots()
+    for element in render_lst:
+        graphics.drawString(mc.font, *element)         
+
+def on_end_tick(mc):
+    global screen
+    
+    if not mc.screen:
+        return
+    if not mc.screen.equals(screen):
+        ScreenEvents.afterRender(mc.screen).register(ScreenEventsAfterRender(render_callback))
+        screen = mc.screen
+
+def show_slots():
+    global tick_callback, render_callback
+    
+    render_callback = ManagedCallback(after_render)
+    tick_callback = ManagedCallback(on_end_tick)
+    ClientTickEvents.END_CLIENT_TICK.register(ClientTickEventsEndTick(tick_callback))   
+    
+def hide_slots():
+    global screen
+    
+    render_callback.cancel()
+    tick_callback.cancel()
+    screen = None
+""")
+
+# Thanks to razrcraft on helping solve some errors!
+show = pyj_embed.getFunction("show_slots")
+hide = pyj_embed.getFunction("hide_slots")
+
+def show_slots():
+    """
+    Renders the indices of all slots in an invenotry on top of them.
+    
+    Returns:
+        True
+    """
+    show()
+    return True
+    
+def hide_slots():
+    """
+    Unrenders the indices of all slots in an invenotry on top of them.
+    
+    Returns:
+        True
+    """
+    hide()
+    return True
+
 def create_recipe_lookup():
     """
     Create a lookup map of craftable recipes from the recipe book.

@@ -1,8 +1,8 @@
 # Lib_Inv
 
-**Version:** 1.6.3
+**Version:** 1.7.0
 **Author:** JulianIsLost  
-**Date:** 08.09.2025  
+**Date:** 09.09.2025  
 
 User-friendly API for performing invenotry operations in Minecraft. 
 This module should be imported by other scripts and not run directly.  
@@ -71,6 +71,22 @@ Before you start, make sure you have:
 
   Clicks a button in an open ui.
   *returns:* `True` if succesful, `False` if there is no ui open.
+
+---
+
+### `Inventory Rendering`
+
+- **show_slots() -> bool**
+
+  Renders the indices of all slots in an invenotry on top of them.
+  Useful for understanding the indexing other methods use.
+  *returns:* True
+  > Implementation inspired by Minescript Plus
+
+- **hide_slots() -> bool**
+
+  Unrenders the indices of all slots in an invenotry on top of them.
+  *returns:* True
 
 ---
 
