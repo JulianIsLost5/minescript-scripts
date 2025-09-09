@@ -1,0 +1,58 @@
+import astar
+from camera import Camera
+
+ClientTickEvents = JavaClass("net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents")
+ClientTickEventsEndTick = JavaClass("net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents$EndTick")
+BlockPos = JavaClass("net.minecraft.core.BlockPos")
+Anchor = JavaClass("net.minecraft.commands.arguments.EntityAnchorArgument$Anchor")
+Minecraft = JavaClass("net.minecraft.client.Minecraft")
+Math = JavaClass("java.lang.Math")
+ 
+mc = Minecraft.getInstance()
+
+target_pos = BlockPos(7, -55, 5)
+path = astar.pathfind(mc.player.blockPosition().offset(0, -1, 0), target_pos)
+camera = Camera()
+
+node = 0
+current_target = path[node].block.getCenter().add(0, 2, 0)
+
+def on_press_key(event):
+    if event.action == 0 and event.key == 342:  # ALT
+        callback.cancel()
+        mc.options.keyJump.setDown(False)
+        mc.options.keyUp.setDown(False)
+        mc.options.keySprint.setDown(False)
+        execute("\killjob 1")
+
+def on_end_tick(mc):
+    global node, current_target
+    
+    mc.options.keyUp.setDown(True)
+    mc.options.keySprint.setDown(True)
+    eye_pos = mc.player.getEyePosition()
+    vec = eye_pos.vectorTo(current_target)
+
+    if vec.y > 0.3:
+        mc.options.keyJump.setDown(True)
+    else:
+        mc.options.keyJump.setDown(False)
+    
+    if eye_pos.distanceTo(target_pos.getCenter().add(0, 2, 0)) < 0.6:
+        callback.cancel()
+        mc.options.keyJump.setDown(False)
+        mc.options.keyUp.setDown(False)
+        mc.options.keySprint.setDown(False)
+    elif vec.horizontalDistance() < 0.6:
+        node += 1
+        current_target = path[node].block.getCenter().add(0, 2, 0)
+
+    yaw = Math.atan2(-vec.x, vec.z) * (180 / Math.PI)
+    pitch = Math.asin(-vec.y) * (180 / Math.PI)
+
+    if Math.abs(yaw - mc.player.getViewYRot(0)) > 10 or Math.abs(pitch - mc.player.getViewXRot(0)) > 5:
+        camera.set_goal(yaw, pitch, 50)
+
+add_event_listener("key", on_press_key)
+callback = ManagedCallback(on_end_tick)
+ClientTickEvents.END_CLIENT_TICK.register(ClientTickEventsEndTick(callback))
