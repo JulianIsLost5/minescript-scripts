@@ -1,4 +1,21 @@
-Minecraft = JavaClass("net.minecraft.client.Minecraft") # type: ignore  
+from java import *
+import minescript as m
+m.set_default_executor(m.script_loop)
+
+Minecraft = JavaClass("net.minecraft.client.Minecraft") 
+Math = JavaClass("java.lang.Math")
+BlockPos = JavaClass("net.minecraft.core.BlockPos")
+Anchor = JavaClass("net.minecraft.commands.arguments.EntityAnchorArgument$Anchor")
+
+mc = Minecraft.getInstance()
+
+pyj_embed = eval_pyjinn_script(r"""
+Minecraft = JavaClass("net.minecraft.client.Minecraft") 
+ClientTickEvents = JavaClass("net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents")
+ClientTickEventsEndTick = JavaClass("net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents$EndTick")
+BlockPos = JavaClass("net.minecraft.core.BlockPos")
+Anchor = JavaClass("net.minecraft.commands.arguments.EntityAnchorArgument$Anchor")
+Math = JavaClass("java.lang.Math")
      
 mc = Minecraft.getInstance()           
         
@@ -43,7 +60,7 @@ def pathfind(start, end):
         if current.block.equals(end):
             path = []
             while current:
-                path.append(current)
+                path.append(current.block)
                 current = current.parent
             path.reverse()
             return path
@@ -106,3 +123,38 @@ def pathfind(start, end):
                             existing.g = neighbour_node.g
                             existing.f = existing.g + existing.h
                             existing.parent = current 
+""")
+
+pathfind_method = pyj_embed.getFunction("pathfind")
+
+def pathfind(start, end):
+    return pathfind_method(start, end)
+
+def walk(end):
+    path = pathfind(mc.player.blockPosition().offset(0, -1, 0), end)
+    node = 0    
+
+    current_target = path.__getattr__("__getitem__")(node).getCenter().add(0, 2, 0)
+    
+    mc.options.keyUp.setDown(True)
+    mc.options.keySprint.setDown(True)
+    while True:
+        eye_pos = mc.player.getEyePosition()
+        vec = eye_pos.vectorTo(current_target)
+
+        if vec.y > 0.3:
+            mc.options.keyJump.setDown(True)
+        else:
+            mc.options.keyJump.setDown(False)
+    
+        if eye_pos.distanceTo(end.getCenter().add(0, 2, 0)) < 0.6:
+            mc.options.keyJump.setDown(False)
+            mc.options.keySprint.setDown(False)
+            mc.options.keyUp.setDown(False)
+            return True
+        
+        elif vec.horizontalDistance() < 0.6:
+            node += 1
+            current_target = path.__getattr__("__getitem__")(node).getCenter().add(0, 2, 0)
+
+        mc.player.lookAt(Anchor.EYES, current_target)
