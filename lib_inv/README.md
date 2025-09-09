@@ -1,6 +1,6 @@
 # Lib_Inv
 
-**Version:** 1.7.0
+**Version:** 1.8.0
 **Author:** JulianIsLost  
 **Date:** 09.09.2025  
 
@@ -175,8 +175,8 @@ Before you start, make sure you have:
 - **sort_inventory(container: bool = False) -> bool**
 
   Sort inventory by merging partial stacks and then sorting by tag and aplhabet.  
-  <sub> Unintended behavior might occur, please report it to me</sub>
-  *returns:* `True` when done.
+  *returns:* `True` when done.  
+  <sub> Unintended behavior might occur, please report it to me</sub>  
   > Special thanks to razrcraft for brainstorming an approach with me
 
 ---
@@ -187,6 +187,10 @@ Before you start, make sure you have:
 
   Selects the best tool for breaking the block at a given position.
   *returns:* `True` if a tool was selected, `False` otherwise.
+
+- **find_containers(radius: int | list[int, int, int], return_block_entity: bool = False, return_block_pos: bool = False) -> tuple(int, int, int) | BlockEntity | BlockPos:**
+  Finds all container blocks in an area around the player.
+  *returns:* A list of container coordinates or BlockEntities or BlockPos.
 
 ---
 

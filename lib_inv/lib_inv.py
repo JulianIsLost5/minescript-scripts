@@ -831,6 +831,62 @@ def select_best_tool(position: list[int, int, int]) -> bool:
         return True
     return False
 
+pyj_embed = eval_pyjinn_script(r"""
+Minecraft = JavaClass("net.minecraft.client.Minecraft")
+MutableBlockPos = JavaClass("net.minecraft.core.BlockPos$MutableBlockPos")
+RandomizableContainerBlockEntity = JavaClass("net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity")
+Vec3 = JavaClass("net.minecraft.world.phys.Vec3")
+
+mc = Minecraft.getInstance()         
+
+def find_containers(return_block_entity: bool, return_block_pos: bool, *args):
+    containers = []
+    pos = MutableBlockPos()
+    center = mc.player.blockPosition()
+
+    if len(args) > 1:
+        radius = Vec3(*args)
+    else:
+        radius = Vec3(*args, *args, *args)
+
+    for dx in range(-radius.x, radius.x+1):
+        for dy in range(-radius.y, radius.y+1):
+            for dz in range(-radius.z, radius.z+1):
+                pos.set(center.getX() + dx, center.getY() + dy, center.getZ() + dz)
+                if not mc.level.hasChunk(pos.getX(), pos.getZ()):
+                    continue
+                    
+                block_entity = mc.level.getBlockEntity(pos)
+                if block_entity is not None:
+                    if type(RandomizableContainerBlockEntity).isAssignableFrom(block_entity.getClass()):
+                        if return_block_entity:
+                            containers.append(block_entity)
+                        elif return_block_pos:
+                            containers.append(pos.immutable())
+                        else:
+                            containers.append((pos.getX(), pos.getY(), pos.getZ()))
+                            
+    return containers
+""")
+
+find_containers_method = pyj_embed.getFunction("find_containers")
+
+def find_containers(radius: int | list[int, int, int], return_block_pos: bool = False, return_block_entity: bool = False,):
+    """
+    Finds nearby containers.
+    
+    Args:
+        radius: Radius around the player position to be checked
+        return_block_entity: Whether to return the BlockEntity or not (default: False)
+        eturn_block_pos: Whether to return the position as a BlockPos or not (default: False)
+    Returns:
+        List of the containers.
+    """
+    if type(radius) is int:
+        return find_containers_method(return_block_entity, return_block_pos, radius)
+    else:
+        return find_containers_method(return_block_entity, return_block_pos, *radius)
+
 class _Listener():
     def __init__(self):
         self.registered = False
