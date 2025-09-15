@@ -369,6 +369,39 @@ def get_item_at_slot(slot: int, container: bool = False):
         
     slot_stack = container_menu.getItems().get(slot)     
     return slot_stack      
+
+def get_durability_of_slot(slot: int, container: bool = False) -> int:
+    """
+    Get the durability of an item at a given slot.
+    
+    Args:
+        slot: To be queried slot
+        container: Whether to use a container menu (default: False).
+    Returns:
+        Integer of durabilty
+    """
+    if container:
+        screen = mc.screen
+        if screen is None:
+            return None
+        container_menu = screen.getMenu()
+    else:
+        container_menu = mc.player.containerMenu
+        
+    slot_stack = container_menu.getItems().get(slot)   
+    
+    return slot_stack.getMaxDamage() - slot_stack.getDamageValue()
+
+def get_durability_of_item(item_stack) -> int:
+    """
+    Get the durability of an ItemStack.
+    
+    Args:
+        item_stack: ItemStack instance that should be checked for durability
+    Returns:
+        Integer of durabilty
+    """
+    return item_stack.getMaxDamage() - item_stack.getDamageValue()
     
 def get_empty_slots(container: bool = False):
     """
@@ -886,6 +919,24 @@ def find_containers(radius: int | list[int, int, int], return_block_pos: bool = 
         return find_containers_method(return_block_entity, return_block_pos, radius)
     else:
         return find_containers_method(return_block_entity, return_block_pos, *radius)
+
+def get_food_level() -> int: 
+    """
+    Gets the players current food level.
+
+    Returns:
+        Integer value of the food level.
+    """
+    return mc.player.getFoodData().getFoodLevel()
+
+def get_saturation_level() -> int:
+    """
+    Gets the players current saturation level.
+
+    Returns:
+        Integer value of the saturation level.
+    """
+    return Float(mc.player.getFoodData().getSaturationLevel()).intValue()
 
 class _Listener():
     def __init__(self):

@@ -1,8 +1,8 @@
 # Lib_Inv
 
-**Version:** 1.8.0
+**Version:** 1.9.0
 **Author:** JulianIsLost  
-**Date:** 09.09.2025  
+**Date:** 15.09.2025  
 
 User-friendly API for performing invenotry operations in Minecraft. 
 This module should be imported by other scripts and not run directly.  
@@ -40,36 +40,36 @@ Before you start, make sure you have:
 
 - **click_slot(slot: int, right_button: bool = False, container: bool = True) -> bool**
 
-  Clicks on an inventory slot.
-  *Returns:* `True` if successful, `False` if otherwise. 
+  Clicks on an inventory slot.  
+  *Returns:* `True` if successful, `False` if otherwise.   
   > Extended on Minescript Plus
 
 - **drop_slot(slot: int, stack: bool = False, container: bool = True) -> bool**
 
-  Drops an item from the specified slot.
+  Drops an item from the specified slot.  
   *returns:* `True` if successful, `False` otherwise.
 
 - **shift_click_slot(slot: int, container: bool = True) -> bool**
 
-  Performs a shift-click on a slot (moves item between inventories).
-  *returns:* `True` if successful, `False` otherwise.
+  Performs a shift-click on a slot (moves item between inventories).  
+  *returns:* `True` if successful, `False` otherwise.  
   > Extended on Minescript Plus
 
 - **swap_slots(slot1: int, slot2: int, container: bool = True) -> bool**
 
-  Swaps the contents of two inventory slots.
+  Swaps the contents of two inventory slots.  
   *returns:* `True` if successful, `False` otherwise.
 
 
 - **inventory_hotbar_swap(inv_slot: int, hotbar_slot: int) -> bool**
 
-  Swaps a slot of the inventory with a slot of the hotbar
-  *returns:* `True` if done.
+  Swaps a slot of the inventory with a slot of the hotbar  
+  *returns:* `True` if done.  
   > Extended on Minescript Plus
 
 - **click_ui_button(button_index: int) -> bool**
 
-  Clicks a button in an open ui.
+  Clicks a button in an open ui.  
   *returns:* `True` if succesful, `False` if there is no ui open.
 
 ---
@@ -78,14 +78,14 @@ Before you start, make sure you have:
 
 - **show_slots() -> bool**
 
-  Renders the indices of all slots in an invenotry on top of them.
-  Useful for understanding the indexing other methods use.
-  *returns:* True
+  Renders the indices of all slots in an invenotry on top of them.  
+  Useful for understanding the indexing other methods use.  
+  *returns:* True  
   > Implementation inspired by Minescript Plus
 
 - **hide_slots() -> bool**
 
-  Unrenders the indices of all slots in an invenotry on top of them.
+  Unrenders the indices of all slots in an invenotry on top of them.  
   *returns:* True
 
 ---
@@ -94,14 +94,14 @@ Before you start, make sure you have:
 
 - **create_recipe_lookup() -> HashMap**
 
-  Creates a lookup for crafting recipes. Must be newly created each session.
+  Creates a lookup for crafting recipes. Must be newly created each session.  
   *returns:* `HashMap` that is used by the following `craft()` method.
 
 
 - **craft(item_id: str, lookup, craft_all: bool = False) -> bool**
 
-  Performs a crafting operation using the crafting book's recipes.
-  *returns:* `True` if succesful, `False` if there is no crafting ui open.
+  Performs a crafting operation using the crafting book's recipes.  
+  *returns:* `True` if succesful, `False` if there is no crafting ui open.  
   <u>Note</u>: `lookup` must be the `HashMap` returned by `create_recipe_lookup()`
 
 ---
@@ -110,50 +110,59 @@ Before you start, make sure you have:
 
 - **is_slot_empty(slot: int, container: bool = False) -> bool**
 
-  Checks if a slot is empty.
+  Checks if a slot is empty.  
   *returns:* `True` if empty, `False` otherwise.
 
 
 - **get_empty_slots(container: bool = False) -> list[int] | None**
 
-  Finds all empty slots in the inventory or container.
+  Finds all empty slots in the inventory or container.  
   *returns:* A list of empty slot indices, or `None` if no screen is open.
 
 
 - **get_item_at_slot(slot: int, container: bool = False) -> ItemStack | None**
 
-  Gets the item at a given slot.
+  Gets the item at a given slot.  
   *returns:* The `ItemStack` at the slot, or `None` if unavailable.
 
+- **get_durability_of_slot(slot: int, container: bool = False) -> int:**
+
+  Get the durability of an item at a given slot.  
+  *returns:* Integer of durabilty.
+
+- **get_durability_of_item(item_stack: ItemStack) -> int:**
+
+  Get the durability of an item at a given slot.  
+  *returns:* Integer of durabilty.
 
 - **find_item(item_id: str, container: bool = False) -> int | None**
 
-  Finds the first slot index containing the given item.
-  *returns:* The slot index if found, otherwise `None`.
+  Finds the first slot index containing the given item.  
+  *returns:* The slot index if found, otherwise `None`.  
   > Extended on Minescript Plus
 
 
 - **count_item(item_id: str, container: bool = False) -> int | None**
 
-  Counts the total number of a specific item.
-  *returns:* The total count of the item, or `None` if no screen is open.
+  Counts the total number of a specific item.  
+  *returns:* The total count of the item, or `None` if no screen is open.  
   > Extended on Minescript Plus
 
 
 - **has_item(item_id: str, amount: int = 1, container: bool = False) -> bool:**
 
-  Returns if the container at least holds the given amount of the item.
+  Returns if the container at least holds the given amount of the item.  
   *returns:* `True` if there are at least the amount of items, `False` otherwise.
 
 
 - **is_inventory_full() -> bool**
 
-  Checks if the player inventory is completely full.
+  Checks if the player inventory is completely full.  
   *returns:** `True` if full, `False` otherwise.
 
 - **check_for_space(item_id: str, count: int) -> bool**
 
-  Checks if there is enough space in the inventory for a given item stack.
+  Checks if there is enough space in the inventory for a given item stack.  
   *returns:** `True` if it can fit, `False` otherwise.
 
 ---
@@ -162,13 +171,13 @@ Before you start, make sure you have:
 
 - **merge_stacks(slot1: int, slot2: int, container: bool = True) -> bool**
 
-  Merges two compatible item stacks if possible.
+  Merges two compatible item stacks if possible.  
   *returns:* `True` if stacks were merged, `False` otherwise.
 
 
 - **compact_inventory(container: bool = True) -> bool**
 
-  Compact inventory by merging partial stacks of identical items.
+  Compact inventory by merging partial stacks of identical items.  
   *returns:* `True` when done.
 
 
@@ -185,12 +194,23 @@ Before you start, make sure you have:
 
 - **select_best_tool(position: tuple[int, int, int]) -> bool**
 
-  Selects the best tool for breaking the block at a given position.
+  Selects the best tool for breaking the block at a given position.  
   *returns:* `True` if a tool was selected, `False` otherwise.
 
 - **find_containers(radius: int | list[int, int, int], return_block_entity: bool = False, return_block_pos: bool = False) -> tuple(int, int, int) | BlockEntity | BlockPos:**
-  Finds all container blocks in an area around the player.
+
+  Finds all container blocks in an area around the player.  
   *returns:* A list of container coordinates or BlockEntities or BlockPos.
+
+- **get_food_level() -> int:**
+
+  Gets the players current food level.  
+  *returns:* Integer value of the food level.
+
+- **get_saturation_level() -> int:**
+
+  Gets the players current saturation level.  
+  *returns:* Integer value of the saturation level.
 
 ---
 
